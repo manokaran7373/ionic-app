@@ -1,0 +1,7 @@
+{
+  "name": "geofencing",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
