@@ -1,0 +1,26 @@
+/* Custom styles for Ionic components */
+ion-input {
+    --padding-start: 2.5rem !important;
+    --background: transparent !important;
+    --color: white !important;
+}
+
+ion-button {
+    --background: transparent;
+    --box-shadow: none;
+}
+
+ion-button.gradient {
+    --background: linear-gradient(to right, #3B82F6, #10B981);
+}
+
+/* Ensure content is centered on all devices */
+ion-content {
+    --background: transparent;
+}
+
+.ion-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
