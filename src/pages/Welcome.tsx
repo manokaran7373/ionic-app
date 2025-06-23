@@ -3,7 +3,6 @@ import {
     IonPage,
     IonContent,
     IonIcon,
-    isPlatform
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { Geolocation } from '@capacitor/geolocation';
@@ -26,7 +25,7 @@ const Welcome: React.FC = () => {
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                path: '/src/assets/lottie_json/Globe.json'
+                path: 'assets/lottie_json/Globe.json'
             });
         }
 
