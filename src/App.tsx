@@ -2,9 +2,12 @@ import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { AuthProvider, useAuth } from "./components/AuthContext";
-import Login from './pages/Login';
 import RazorpayDemo from './pages/RazorpayDemo';
 import { RouteProps, RouteComponentProps } from 'react-router-dom';
+import Welcome from './pages/Welcome';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
 }
@@ -53,17 +56,12 @@ const AppContent: React.FC = () => {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet>
-          <Route 
-            exact 
-            path="/login" 
-            render={() => (
-              accessToken ? <Redirect to="/razorpay" /> : <Login />
-            )}
-          />
-          <PrivateRoute path="/razorpay" component={RazorpayDemo} />
+          <Route exact path="/welcome" component={Welcome} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/signup" component={Signup} />
           <Route exact path="/">
-            <Redirect to={accessToken ? "/razorpay" : "/login"} />
-          </Route>
+          <Redirect to="/welcome" />
+        </Route>
         </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>

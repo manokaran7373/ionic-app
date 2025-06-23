@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
     IonContent,
     IonPage,
-    IonInput,
-    IonButton,
     IonIcon,
     IonLabel,
     IonCheckbox,
     IonGrid,
     IonRow,
     IonCol,
-    IonText,
 } from '@ionic/react';
 import {
     mailOutline,
@@ -26,17 +23,17 @@ import { API_BASE_URL, API_ENDPOINTS } from '../components/config/constants';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { useIonRouter } from '@ionic/react';
 import { initializeGoogleAuth } from '../components/config/googleAuth';
+import { isPlatform } from '@ionic/react';
+import { Link } from 'react-router-dom';
 
 
 const Login: React.FC = () => {
     const { setAccessToken } = useAuth();
     const router = useIonRouter();
-
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-
     const [errors, setErrors] = useState<{
         email?: string;
         password?: string;
@@ -45,9 +42,7 @@ const Login: React.FC = () => {
     const [alert, setAlert] = useState<{
         show: boolean;
         message: string;
-        type: 'success' | 'error';
-    }>({ show: false, message: '', type: 'success' });
-
+    }>({ show: false, message: '' });
 
     useEffect(() => {
         initializeGoogleAuth();
@@ -55,301 +50,224 @@ const Login: React.FC = () => {
 
     const validateForm = () => {
         const newErrors: typeof errors = {};
-
         if (!email) newErrors.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Invalid email format';
-
         if (!password) newErrors.password = 'Password is required';
         else if (password.length < 8) newErrors.password = 'Password must be at least 8 characters';
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validateForm()) return;
-
         try {
             const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGIN}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
-
             const data = await response.json();
 
-            if (!response.ok) throw new Error(data.message || 'Login failed');
+            if (!response.ok) {
+                setErrors({ general: data.message || 'Login failed' });
+                return;
+            }
 
             await setAccessToken(data.accessToken);
             setAlert({
                 show: true,
-                message: 'Login successful!',
-                type: 'success',
+                message: 'Login successful!'
             });
+            router.push('/dashboard');
         } catch (error: any) {
-            setErrors({ general: error.message });
-            setAlert({
-                show: true,
-                message: error.message,
-                type: 'error',
-            });
+            setErrors({ general: 'An unexpected error occurred' });
         }
     };
 
-const handleGoogleLogin = async () => {
-  try {
-    // Get Google user data
-    const googleUser = await GoogleAuth.signIn();
-    
-    // Extract the ID token
-    const googleToken = googleUser.authentication.idToken;
-    
-    // Send to your backend
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGIN}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        google_token: googleToken,
+    const handleGoogleLogin = async () => {
+        try {
+            const googleUser = await GoogleAuth.signIn();
+            const googleToken = googleUser.authentication.idToken;
+            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGIN}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    google_token: googleToken,
+                    platform: isPlatform('android') ? 'android' : 'web'
+                })
+            });
+            const data = await response.json();
 
-      })
-    });
+            if (!response.ok) {
+                setErrors({ general: data.message });
+                return;
+            }
 
-    const data = await response.json();
-
-    if (response.ok) {
-      // Store the access token from your backend
-      await setAccessToken(data.accessToken);
-      
-      setAlert({
-        show: true,
-        message: 'Google Login successful!',
-        type: 'success'
-      });
-
-      router.push('/dashboard');
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (error: any) {
-    setAlert({
-      show: true,
-      message: error.message || 'Google login failed',
-      type: 'error'
-    });
-  }
-};
-
-
-
-
-    // Font styles object
-    const fontStyles = {
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif"
+            await setAccessToken(data.accessToken);
+            setAlert({
+                show: true,
+                message: 'Google Login successful!'
+            });
+            router.push('/dashboard');
+        } catch (error: any) {
+            setErrors({ general: 'An unexpected error occurred' });
+        }
     };
 
     return (
         <IonPage>
-            <IonContent fullscreen style={fontStyles}>
-                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 font-poppins relative overflow-hidden">
-                    <IonGrid className="h-full">
-                        <IonRow className="h-full ion-justify-content-center ion-align-items-center">
-                            <IonCol size="12" sizeMd="6" sizeLg="4" className="ion-padding">
-                                <div className="w-full max-w-md mx-auto">
-                                    {/* Logo/Brand Section */}
-                                    <div className="text-center mb-8">
-                                        <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
+            <IonContent fullscreen className="font-inter">
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 md:p-6 lg:p-8">
+                    <div className="w-full sm:w-[450px] md:w-[480px] lg:w-[520px] mx-auto">
+                        {/* Logo Section */}
+                        <div className="text-center mb-6 md:mb-8 lg:mb-10">
+                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
+                                <IonIcon icon={lockClosedOutline} className="text-white text-2xl md:text-3xl" />
+                            </div>
+                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">Welcome Back</h1>
+                            <p className="text-base md:text-lg text-slate-400">Sign in to your account</p>
+                        </div>
+
+                        {/* Form Container */}
+                        <div className="bg-white/10 backdrop-blur-xl p-6 md:p-8 lg:p-10 rounded-3xl shadow-2xl border border-white/20 mb-6">
+                            <form onSubmit={handleLogin} className="space-y-6">
+                                {/* Form fields remain the same but with responsive text sizes */}
+                                <div className="space-y-2">
+                                    <IonLabel className="text-sm md:text-base text-slate-300 font-medium block ml-1">
+                                        Email Address
+                                    </IonLabel>
+                                    <div className="relative">
+                                        <IonIcon
+                                            icon={mailOutline}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg md:text-xl"
+                                        />
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Enter your email"
+                                            className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 text-base md:text-lg"
+                                        />
+                                    </div>
+                                    {errors.email && (
+                                        <div className="text-red-500 text-sm md:text-base mt-1">{errors.email}</div>
+                                    )}
+                                </div>
+
+                                {/* Password field with responsive sizing */}
+                                <div className="space-y-2">
+                                    <IonLabel className="text-sm md:text-base text-slate-300 font-medium block ml-1">
+                                        Password
+                                    </IonLabel>
+                                    <div className="relative">
+                                        <IonIcon
+                                            icon={lockClosedOutline}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg md:text-xl"
+                                        />
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Enter your password"
+                                            className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 text-base md:text-lg"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
                                             <IonIcon
-                                                icon={lockClosedOutline}
-                                                className="text-white text-3xl"
+                                                icon={showPassword ? eyeOffOutline : eyeOutline}
+                                                className="text-slate-400 hover:text-white transition-colors text-lg md:text-xl"
                                             />
-                                        </div>
-                                        <h1 className="text-4xl font-bold text-white mb-2">
-                                            Welcome Back
-                                        </h1>
-                                        <p className="text-slate-400 text-lg">
-                                            Sign in to your account
-                                        </p>
+                                        </button>
                                     </div>
+                                    {errors.password && (
+                                        <div className="text-red-500 text-sm md:text-base mt-1">{errors.password}</div>
+                                    )}
+                                </div>
 
-                                    {/* Login Form */}
-                                    <div className="bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/20 mb-6">
-                                        <form onSubmit={handleLogin} className="space-y-6">
-                                            {/* Email Input */}
-                                            <div className="space-y-2">
-                                                <IonLabel className="text-slate-300 font-medium text-sm block ml-1">
-                                                    Email Address
-                                                </IonLabel>
-                                                <div className="relative">
-                                                    <IonIcon
-                                                        icon={mailOutline}
-                                                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 z-10"
-                                                    />
-                                                    <IonInput
-                                                        type="email"
-                                                        value={email}
-                                                        onIonInput={(e) => setEmail(e.detail.value!)}
-                                                        placeholder="Enter your email"
-                                                        className="custom-input"
-                                                        fill="outline"
-                                                        style={{
-                                                            '--background': 'rgba(255, 255, 255, 0.05)',
-                                                            '--border-color': 'rgba(255, 255, 255, 0.1)',
-                                                            '--border-radius': '12px',
-                                                            '--padding-start': '48px',
-                                                            '--padding-end': '16px',
-                                                            '--color': 'white',
-                                                            '--placeholder-color': 'rgba(148, 163, 184, 0.7)',
-                                                        }}
-                                                    />
-                                                </div>
-                                                {errors.email && (
-                                                    <div className="text-red-500 text-sm mt-1">{errors.email}</div>
-                                                )}
-                                            </div>
-
-                                            {/* Password Input */}
-                                            <div className="space-y-2">
-                                                <IonLabel className="text-slate-300 font-medium text-sm block ml-1">
-                                                    Password
-                                                </IonLabel>
-                                                <div className="relative">
-                                                    <IonIcon
-                                                        icon={lockClosedOutline}
-                                                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 z-10"
-                                                    />
-                                                    <IonInput
-                                                        type={showPassword ? "text" : "password"}
-                                                        value={password}
-                                                        onIonInput={(e) => setPassword(e.detail.value!)}
-                                                        placeholder="Enter your password"
-                                                        className="custom-input"
-                                                        fill="outline"
-                                                        style={{
-                                                            '--background': 'rgba(255, 255, 255, 0.05)',
-                                                            '--border-color': 'rgba(255, 255, 255, 0.1)',
-                                                            '--border-radius': '12px',
-                                                            '--padding-start': '48px',
-                                                            '--padding-end': '48px',
-                                                            '--color': 'white',
-                                                            '--placeholder-color': 'rgba(148, 163, 184, 0.7)',
-                                                        }}
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                                                    >
-                                                        <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
-                                                    </button>
-                                                    {errors.password && (
-                                                        <div className="text-red-500 text-sm mt-1">{errors.password}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Remember Me & Forgot Password */}
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-2">
-                                                    <IonCheckbox
-                                                        checked={rememberMe}
-                                                        onIonChange={(e) => setRememberMe(e.detail.checked)}
-                                                        className="text-blue-500"
-                                                    />
-                                                    <IonLabel className="text-slate-300 text-sm">
-                                                        Remember me
-                                                    </IonLabel>
-                                                </div>
-                                                <IonButton
-                                                    fill="clear"
-                                                    size="small"
-                                                    className="text-blue-400 hover:text-blue-300"
-                                                >
-                                                    Forgot Password?
-                                                </IonButton>
-                                            </div>
-
-
-                                            {/* Login Button */}
-                                            <IonButton
-                                                expand="block"
-                                                type="submit"
-                                                className="login-button h-14 font-semibold text-lg"
-                                                style={{
-                                                    '--background': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                    '--background-hover': 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                                                    '--border-radius': '12px',
-                                                    '--box-shadow': '0 10px 25px rgba(102, 126, 234, 0.3)',
-                                                }}
-                                            >
-                                                Sign In
-                                                <IonIcon icon={arrowForwardOutline} slot="end" />
-                                            </IonButton>
-
-                                            {/* Divider */}
-                                            <div className="relative my-8">
-                                                <div className="absolute inset-0 flex items-center">
-                                                    <div className="w-full border-t border-slate-600"></div>
-                                                </div>
-                                                <div className="relative flex justify-center">
-                                                    <span className="px-4 text-sm text-slate-400 bg-slate-900/50 backdrop-blur-sm rounded-full">
-                                                        Or continue with
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Google Login */}
-                                            <IonButton
-                                                expand="block"
-                                                fill="outline"
-                                                className="google-button h-14 font-medium"
-                                                onClick={handleGoogleLogin}
-                                                style={{
-                                                    '--background': 'rgba(255, 255, 255, 0.05)',
-                                                    '--border-color': 'rgba(255, 255, 255, 0.1)',
-                                                    '--border-radius': '12px',
-                                                    '--color': 'white',
-                                                }}
-                                            >
-                                                <FcGoogle className="mr-3" size={24} />
-                                                Continue with Google
-                                            </IonButton>
-                                        </form>
+                                {/* Remember Me & Forgot Password */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <IonCheckbox
+                                            checked={rememberMe}
+                                            onIonChange={(e) => setRememberMe(e.detail.checked)}
+                                            className="text-blue-500"
+                                        />
+                                        <span className="text-sm md:text-base text-slate-300">Remember me</span>
                                     </div>
+                                    <button type="button" className="text-sm md:text-base text-blue-400 hover:text-blue-300">
+                                        Forgot Password?
+                                    </button>
+                                </div>
 
-                                    {/* Sign Up Link */}
-                                    <div className="text-center">
-                                        <IonText className="text-slate-400">
-                                            Don't have an account?{' '}
-                                            <IonButton
-                                                fill="clear"
-                                                size="small"
-                                                className="text-blue-400 hover:text-blue-300 font-semibold"
-                                            >
-                                                Create Account
-                                            </IonButton>
-                                        </IonText>
+                                {/* Sign In Button */}
+                                <button
+                                    type="submit"
+                                    className="w-full h-12 md:h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold text-base md:text-lg flex items-center justify-center space-x-2 hover:opacity-90 transition-opacity"
+                                >
+                                    <span>Sign In</span>
+                                    <IonIcon icon={arrowForwardOutline} />
+                                </button>
+
+                                {/* Error Message */}
+                                {errors.general && (
+                                    <div className="text-red-500 text-sm md:text-base text-center mt-2">{errors.general}</div>
+                                )}
+
+                                {/* Divider */}
+                                <div className="relative my-6 md:my-8">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-slate-600"></div>
+                                    </div>
+                                    <div className="relative flex justify-center">
+                                        <span className="px-4 text-sm md:text-base text-slate-400 bg-slate-900/50 backdrop-blur-sm rounded-full">
+                                            Or continue with
+                                        </span>
                                     </div>
                                 </div>
-                            </IonCol>
-                        </IonRow>
-                    </IonGrid>
-                    <AlertMessage
-                        isOpen={alert.show}
-                        message={alert.message}
-                        type={alert.type}
-                        onDidDismiss={() => setAlert({ ...alert, show: false })}
-                    />
 
+                                {/* Google Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleLogin}
+                                    className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl text-white font-medium text-base md:text-lg flex items-center justify-center space-x-3 hover:bg-white/10 transition-colors"
+                                >
+                                    <FcGoogle size={24} />
+                                    <span>Continue with Google</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Sign Up Link */}
+                        {/* Sign Up Link */}
+                        <div className="text-center">
+                            <span className="text-sm md:text-base text-slate-400">
+                                Don't have an account?{' '}
+                                <Link
+                                    to="/signup"
+                                    className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200 inline-block"
+                                >
+                                    Create Account
+                                </Link>
+                            </span>
+                        </div>
+
+                    </div>
                 </div>
+                <AlertMessage
+                    isOpen={alert.show}
+                    message={alert.message}
+                    onDidDismiss={() => setAlert({ ...alert, show: false })}
+                />
             </IonContent>
         </IonPage>
     );
+
 };
 
 export default Login;
-
