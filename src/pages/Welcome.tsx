@@ -14,15 +14,16 @@ const Welcome: React.FC = () => {
     const history = useHistory();
     const lottieContainer = useRef<HTMLDivElement>(null);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-    const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
+   const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(() => {
+    return localStorage.getItem('policyAccepted') === 'true';
+});
 
     useEffect(() => {
         let animation: any;
 
         if (lottieContainer.current) {
             animation = Lottie.loadAnimation({
-                container: lottieContainer.current as Element, // Type assertion
-                renderer: 'svg',
+                container: lottieContainer.current as Element, 
                 loop: true,
                 autoplay: true,
                 path: 'assets/lottie_json/Globe.json'
@@ -34,7 +35,7 @@ const Welcome: React.FC = () => {
         };
     }, []);
 
-    const requestLocationPermission = async () => {
+const requestLocationPermission = async () => {
     if (!hasAcceptedPolicy) {
         setShowPrivacyModal(true);
         return;
@@ -42,22 +43,28 @@ const Welcome: React.FC = () => {
 
     if (Capacitor.isNativePlatform()) {
         try {
-            await Geolocation.requestPermissions();
-            await Geolocation.getCurrentPosition();
-            history.push('/login');
+            const permissionStatus = await Geolocation.checkPermissions();
+            
+            if (permissionStatus.location === 'denied' || permissionStatus.location === 'prompt') {
+                const permission = await Geolocation.requestPermissions();
+                if (permission.location === 'granted') {
+                    history.push('/login');
+                }
+            } else {
+                history.push('/login');
+            }
         } catch (error) {
-            console.log('Location permission error:', error);
+            console.log('Location error:', error);
         }
     } else {
-        try {
-            await navigator.geolocation.getCurrentPosition(() => {
-                history.push('/login');
-            });
-        } catch (error) {
-            console.log('Web location error:', error);
-        }
+        // Web platform handling
+        navigator.geolocation.getCurrentPosition(
+            () => history.push('/login'),
+            (error) => console.log('Web location error:', error)
+        );
     }
 };
+
 
 
     return (

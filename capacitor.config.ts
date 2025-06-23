@@ -1,5 +1,5 @@
 
-const config={
+const config = {
   appId: 'io.ionic.starter',
   appName: 'geofencing',
   webDir: 'dist',
