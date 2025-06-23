@@ -1,6 +1,5 @@
-import type { CapacitorConfig } from '@capacitor/cli';
 
-const config: CapacitorConfig = {
+const config={
   appId: 'io.ionic.starter',
   appName: 'geofencing',
   webDir: 'dist'
