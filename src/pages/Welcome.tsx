@@ -18,48 +18,70 @@ const Welcome: React.FC = () => {
         return localStorage.getItem('policyAccepted') === 'true';
     });
 
+
     useEffect(() => {
         let animation: any;
-
         if (lottieContainer.current) {
             animation = Lottie.loadAnimation({
                 container: lottieContainer.current as Element,
+                renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                path: '/public/Globe.json'
+                path: '/assets/Globe.json'
             });
         }
-
         return () => {
             if (animation) animation.destroy();
         };
     }, []);
 
-    const handlePolicyAcceptAndPermission = async () => {
+
+
+    const handleGetStarted = async () => {
+        // Check if policy was already accepted
+        if (!hasAcceptedPolicy) {
+            setShowPrivacyModal(true);
+            return;
+        }
+        await requestLocationPermission();
+    };
+
+    const handlePolicyAccept = async () => {
         localStorage.setItem('policyAccepted', 'true');
         setHasAcceptedPolicy(true);
         setShowPrivacyModal(false);
+        await requestLocationPermission();
+    };
 
-        if (Capacitor.isNativePlatform()) {
-            try {
+    const requestLocationPermission = async () => {
+    if (Capacitor.isNativePlatform()) {
+        try {
+            const permissionStatus = await Geolocation.checkPermissions();
+            
+            if (permissionStatus.location === 'granted') {
+                // Location already enabled, go directly to login
+                history.push('/login');
+            } else {
+                // Request permission only if not granted
                 const permission = await Geolocation.requestPermissions();
                 if (permission.location === 'granted') {
                     history.push('/login');
                 }
-            } catch (error) {
-                console.log('Location permission error:', error);
             }
-        } else {
+        } catch (error) {
+            console.log('Location error:', error);
+        }
+    } else {
+        // Web platform handling
+        if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(
                 () => history.push('/login'),
                 (error) => console.log('Web location error:', error)
             );
         }
-    };
+    }
+};
 
-    const handleGetStarted = () => {
-        setShowPrivacyModal(true);
-    };
 
 
     return (
@@ -133,7 +155,7 @@ const Welcome: React.FC = () => {
                                         Close
                                     </button>
                                     <button
-                                        onClick={handlePolicyAcceptAndPermission}
+                                        onClick={handlePolicyAccept}
                                         className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:opacity-90 transition-all duration-200"
                                     >
                                         Accept
