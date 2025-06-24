@@ -75,6 +75,7 @@ const Login: React.FC = () => {
             }
 
             await setAccessToken(data.accessToken);
+            
             setAlert({
                 show: true,
                 message: 'Login successful!'
