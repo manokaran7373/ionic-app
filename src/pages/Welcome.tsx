@@ -14,19 +14,19 @@ const Welcome: React.FC = () => {
     const history = useHistory();
     const lottieContainer = useRef<HTMLDivElement>(null);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-   const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(() => {
-    return localStorage.getItem('policyAccepted') === 'true';
-});
+    const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(() => {
+        return localStorage.getItem('policyAccepted') === 'true';
+    });
 
     useEffect(() => {
         let animation: any;
 
         if (lottieContainer.current) {
             animation = Lottie.loadAnimation({
-                container: lottieContainer.current as Element, 
+                container: lottieContainer.current as Element,
                 loop: true,
                 autoplay: true,
-                path: 'assets/lottie_json/Globe.json'
+                path: '/public/Globe.json'
             });
         }
 
@@ -35,36 +35,31 @@ const Welcome: React.FC = () => {
         };
     }, []);
 
-const requestLocationPermission = async () => {
-    if (!hasAcceptedPolicy) {
-        setShowPrivacyModal(true);
-        return;
-    }
+    const handlePolicyAcceptAndPermission = async () => {
+        localStorage.setItem('policyAccepted', 'true');
+        setHasAcceptedPolicy(true);
+        setShowPrivacyModal(false);
 
-    if (Capacitor.isNativePlatform()) {
-        try {
-            const permissionStatus = await Geolocation.checkPermissions();
-            
-            if (permissionStatus.location === 'denied' || permissionStatus.location === 'prompt') {
+        if (Capacitor.isNativePlatform()) {
+            try {
                 const permission = await Geolocation.requestPermissions();
                 if (permission.location === 'granted') {
                     history.push('/login');
                 }
-            } else {
-                history.push('/login');
+            } catch (error) {
+                console.log('Location permission error:', error);
             }
-        } catch (error) {
-            console.log('Location error:', error);
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                () => history.push('/login'),
+                (error) => console.log('Web location error:', error)
+            );
         }
-    } else {
-        // Web platform handling
-        navigator.geolocation.getCurrentPosition(
-            () => history.push('/login'),
-            (error) => console.log('Web location error:', error)
-        );
-    }
-};
+    };
 
+    const handleGetStarted = () => {
+        setShowPrivacyModal(true);
+    };
 
 
     return (
@@ -89,7 +84,7 @@ const requestLocationPermission = async () => {
                                 Experience real-time tracking and location-based services with our cutting-edge platform.
                             </p>
                             <button
-                                onClick={requestLocationPermission}
+                                onClick={handleGetStarted}
                                 className="w-full h-12 md:h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold text-base md:text-lg flex items-center justify-center space-x-2 hover:opacity-90 transition-all duration-300"
                             >
                                 <IonIcon icon={locationOutline} className="text-xl md:text-2xl" />
@@ -138,11 +133,7 @@ const requestLocationPermission = async () => {
                                         Close
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            setHasAcceptedPolicy(true);
-                                            setShowPrivacyModal(false);
-                                            requestLocationPermission();
-                                        }}
+                                        onClick={handlePolicyAcceptAndPermission}
                                         className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:opacity-90 transition-all duration-200"
                                     >
                                         Accept
