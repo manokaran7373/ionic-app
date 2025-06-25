@@ -59,12 +59,6 @@ const menuItems: MenuItem[] = [
         description: "View satellite maps"
     },
     {
-        icon: cloudOutline,
-        label: "Weather Analysis",
-        screen: "weather",
-        description: "Check weather conditions"
-    },
-    {
         icon: cardOutline,
         label: "Subscriptions",
         screen: "subscriptions",

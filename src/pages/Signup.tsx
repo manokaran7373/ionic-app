@@ -13,9 +13,13 @@ import { FcGoogle } from 'react-icons/fc';
 import { Link, useHistory } from 'react-router-dom';
 import { API_BASE_URL, API_ENDPOINTS } from '../components/config/constants';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { initializeGoogleAuth } from '../components/config/googleAuth';
+// import { initializeGoogleAuth } from '../components/config/googleAuth';
 import { isPlatform } from '@ionic/react';
 import AlertMessage from '../components/AlertMessage';
+import { useAuth } from '../components/AuthContext';
+import { useIonRouter } from '@ionic/react';
+import { useIonViewWillEnter } from '@ionic/react';
+
 
 
 interface FormData {
@@ -32,6 +36,8 @@ interface FormErrors {
 }
 
 const Signup: React.FC = () => {
+    const { login, axiosInstance } = useAuth();
+    const router = useIonRouter();
     const history = useHistory();
     const [formData, setFormData] = useState({
         fname: '',
@@ -44,32 +50,70 @@ const Signup: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errors, setErrors] = useState<any>({});
-    const [alert, setAlert] = useState({ show: false, message: '' });
+    const [alert, setAlert] = useState<{
+        show: boolean;
+        message: string;
+    }>({ show: false, message: '' });
+    const [googleError, setGoogleError] = useState('');
 
-    useEffect(() => {
-        initializeGoogleAuth();
-    }, []);
+
 
     interface FormData {
-    fname: string;
-    lname: string;
-    email: string;
-    phone: string;
-    password: string;
-    confirm_password: string;
-}
-
-interface FormErrors {
-    [key: string]: string;
-}
-
-const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev: FormData) => ({ ...prev, [field]: value }));
-    
-    if (errors[field]) {
-        setErrors((prev: FormErrors) => ({ ...prev, [field]: '' }));
+        fname: string;
+        lname: string;
+        email: string;
+        phone: string;
+        password: string;
+        confirm_password: string;
     }
-};
+
+    interface FormErrors {
+        [key: string]: string;
+    }
+
+
+    useEffect(() => {
+        // Initialize Google Auth
+        // initializeGoogleAuth();
+
+        // Force clear form data on every mount
+        const resetForm = () => {
+            const emptyForm = {
+                fname: '',
+                lname: '',
+                email: '',
+                phone: '',
+                password: '',
+                confirm_password: ''
+            };
+
+            // Immediate clear
+            setFormData(emptyForm);
+            setErrors({});
+            setAlert({ show: false, message: '' });
+            setShowPassword(false);
+            setShowConfirmPassword(false);
+
+            // Double-check clear after a brief delay
+            setTimeout(() => {
+                setFormData(emptyForm);
+            }, 100);
+        };
+
+        resetForm();
+
+        // Clear on unmount
+        return () => resetForm();
+    }, [router.routeInfo.pathname]); // Add router dependency to trigger on route changes
+
+
+    const handleInputChange = (field: keyof FormData, value: string) => {
+        setFormData((prev: FormData) => ({ ...prev, [field]: value }));
+
+        if (errors[field]) {
+            setErrors((prev: FormErrors) => ({ ...prev, [field]: '' }));
+        }
+    };
 
     const validateForm = () => {
         const newErrors: any = {};
@@ -91,7 +135,7 @@ const handleInputChange = (field: keyof FormData, value: string) => {
         if (!validateForm()) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SIGNUP}`, {
+            const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.SIGNUP}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -110,7 +154,7 @@ const handleInputChange = (field: keyof FormData, value: string) => {
             });
 
             setTimeout(() => {
-                history.push('/login');
+                router.push('/login');
             }, 2000);
 
         } catch (error) {
@@ -123,9 +167,11 @@ const handleInputChange = (field: keyof FormData, value: string) => {
             const googleUser = await GoogleAuth.signIn();
             const googleToken = googleUser.authentication.idToken;
 
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SIGNUP}`, {
+            const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.LOGIN}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     google_token: googleToken,
                     platform: isPlatform('android') ? 'android' : 'web'
@@ -134,22 +180,25 @@ const handleInputChange = (field: keyof FormData, value: string) => {
 
             const data = await response.json();
 
-            if (!response.ok) {
-                setErrors({ general: data.message });
-                return;
+            if (data.status === 'success') {
+                const { access, refresh } = data.data.tokens;
+
+                // First store tokens
+                await login({ access, refresh });
+
+                // Show success message
+                setAlert({
+                    show: true,
+                    message: 'Google Login successful!'
+                });
+
+                // Force navigation after a brief delay
+                setTimeout(() => {
+                    router.push('/dashboard', 'root', 'replace');
+                }, 2000);
             }
-
-            setAlert({
-                show: true,
-                message: 'Google signup successful!'
-            });
-
-            setTimeout(() => {
-                history.push('/dashboard');
-            }, 1500);
-
-        } catch (error) {
-            setErrors({ general: 'An unexpected error occurred' });
+        } catch (error: any) {
+            setGoogleError(error.response?.data?.message || 'Google authentication failed');
         }
     };
 
@@ -365,6 +414,11 @@ const handleInputChange = (field: keyof FormData, value: string) => {
                                     <FcGoogle size={24} />
                                     <span>Continue with Google</span>
                                 </button>
+                                {googleError && (
+                                    <div className="text-red-500 text-sm md:text-base text-center mt-1">
+                                        {googleError}
+                                    </div>
+                                )}
                             </form>
                         </div>
 
@@ -381,17 +435,17 @@ const handleInputChange = (field: keyof FormData, value: string) => {
                             </span>
                         </div>
                     </div>
-                          {/* Alert Message */}
-                <AlertMessage
-                    isOpen={alert.show}
-                    message={alert.message}
-                    onDidDismiss={() => setAlert({ ...alert, show: false })}
-                />
+                    {/* Alert Message */}
+                    <AlertMessage
+                        isOpen={alert.show}
+                        message={alert.message}
+                        onDidDismiss={() => setAlert({ ...alert, show: false })}
+                    />
                 </div>
 
-      
- 
-        </IonContent>
+
+
+            </IonContent>
         </IonPage>
     );
 };

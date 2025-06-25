@@ -5,9 +5,6 @@ import {
     IonIcon,
     IonLabel,
     IonCheckbox,
-    IonGrid,
-    IonRow,
-    IonCol,
 } from '@ionic/react';
 import {
     mailOutline,
@@ -21,14 +18,14 @@ import { useAuth } from '../components/AuthContext';
 import AlertMessage from '../components/AlertMessage';
 import { API_BASE_URL, API_ENDPOINTS } from '../components/config/constants';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { useIonRouter } from '@ionic/react';
-import { initializeGoogleAuth } from '../components/config/googleAuth';
-import { isPlatform } from '@ionic/react';
+import { isPlatform, useIonRouter } from '@ionic/react';
 import { Link } from 'react-router-dom';
+import { initializeGoogleAuth, signInWithGoogle } from '../components/config/googleAuth';
 
 
 const Login: React.FC = () => {
-    const { setAccessToken } = useAuth();
+    const { login, axiosInstance } = useAuth();
+
     const router = useIonRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
@@ -43,6 +40,7 @@ const Login: React.FC = () => {
         show: boolean;
         message: string;
     }>({ show: false, message: '' });
+    const [googleError, setGoogleError] = useState('');
 
     useEffect(() => {
         initializeGoogleAuth();
@@ -58,39 +56,54 @@ const Login: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
+
         try {
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGIN}`, {
+            const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.LOGIN}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
+
             const data = await response.json();
 
-            if (!response.ok) {
-                setErrors({ general: data.message || 'Login failed' });
-                return;
-            }
+            if (data.status === 'success') {
+                const { access, refresh } = data.data.tokens;
+                await login({ access, refresh });
 
-            await setAccessToken(data.accessToken);
-            
-            setAlert({
-                show: true,
-                message: 'Login successful!'
-            });
-            router.push('/dashboard');
+                setAlert({
+                    show: true,
+                    message: 'Login successful!'
+                });
+
+                setTimeout(() => {
+                    router.push('/dashboard', 'root', 'replace');
+                }, 2000);
+            } else {
+                setErrors({
+                    general: data.message || 'Invalid credentials'
+                });
+            }
         } catch (error: any) {
-            setErrors({ general: 'An unexpected error occurred' });
+            setErrors({
+                general: error.response?.data?.message || 'Network error occurred'
+            });
         }
     };
 
+
+
     const handleGoogleLogin = async () => {
+
         try {
-            const googleUser = await GoogleAuth.signIn();
+
+            const googleUser = await signInWithGoogle();
             const googleToken = googleUser.authentication.idToken;
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.LOGIN}`, {
+
+            const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.LOGIN}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,23 +113,32 @@ const Login: React.FC = () => {
                     platform: isPlatform('android') ? 'android' : 'web'
                 })
             });
+
             const data = await response.json();
+            console.log('Server response:', data);
 
-            if (!response.ok) {
-                setErrors({ general: data.message });
-                return;
+            if (data.status === 'success') {
+                const { access, refresh } = data.data.tokens;
+
+                // First store tokens
+                await login({ access, refresh });
+
+                // Show success message
+                setAlert({
+                    show: true,
+                    message: 'Google Login successful!'
+                });
+
+                // Force navigation after a brief delay
+                setTimeout(() => {
+                    router.push('/dashboard', 'root', 'replace');
+                }, 2000);
             }
-
-            await setAccessToken(data.accessToken);
-            setAlert({
-                show: true,
-                message: 'Google Login successful!'
-            });
-            router.push('/dashboard');
         } catch (error: any) {
-            setErrors({ general: 'An unexpected error occurred' });
+            setGoogleError(error.response?.data?.message || 'Google authentication failed');
         }
     };
+
 
     return (
         <IonPage>
@@ -241,10 +263,16 @@ const Login: React.FC = () => {
                                     <FcGoogle size={24} />
                                     <span>Continue with Google</span>
                                 </button>
+
+                                {googleError && (
+                                    <div className="text-red-500 text-sm md:text-base text-center mt-1">
+                                        {googleError}
+                                    </div>
+                                )}
                             </form>
                         </div>
 
-                        {/* Sign Up Link */}
+
                         {/* Sign Up Link */}
                         <div className="text-center">
                             <span className="text-sm md:text-base text-slate-400">

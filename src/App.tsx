@@ -7,7 +7,8 @@ import Welcome from './pages/Welcome';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/tabs/Dashboard';
-import ProcessImage from './pages/tabs/ProcessImage';
+import SatelliteRequest from './pages/Core/SatelliteRequest';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
@@ -29,17 +30,14 @@ import './theme/variables.css';
 
 setupIonicReact();
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  component: Component,
-  ...rest
-}) => {
-  const { accessToken } = useAuth();
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ component: Component, ...rest }) => {
+  const { isAuthenticated } = useAuth();
     
   return (
     <Route
       {...rest}
       render={props =>
-        accessToken ? (
+        isAuthenticated ? (
           <Component {...props} />
         ) : (
           <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
@@ -50,7 +48,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
 };
 
 const AppContent: React.FC = () => {
-  const { accessToken } = useAuth();
+  const { isAuthenticated  } = useAuth();
 
   return (
     <IonApp>
@@ -63,20 +61,12 @@ const AppContent: React.FC = () => {
           
           {/* Protected Routes */}
           <Route exact path="/dashboard" component={Dashboard} />
-          <Route exact path="/process-image" component={ProcessImage}/>
-          {/* <PrivateRoute exact path="/dashboard" component={Dashboard} /> */}
-          {/* <PrivateRoute exact path="/process-image" component={() => <div>Process Image Page</div>} />
-          <PrivateRoute exact path="/satellite-map" component={() => <div>Satellite Map Page</div>} />
-          <PrivateRoute exact path="/land-calculator" component={() => <div>Land Calculator Page</div>} />
-          <PrivateRoute exact path="/weather" component={() => <div>Weather Page</div>} />
-          <PrivateRoute exact path="/subscriptions" component={() => <div>Subscriptions Page</div>} />
-          <PrivateRoute exact path="/settings" component={() => <div>Settings Page</div>} />
-          <PrivateRoute exact path="/help" component={() => <div>Help Page</div>} />
-          <PrivateRoute exact path="/feedback" component={() => <div>Feedback Page</div>} /> */}
+          {/* <Route exact path="/process-image" component={ProcessImage}/> */}
+          <Route exact path="/dashboard/image-request" component={SatelliteRequest}/>
           
           {/* Default Route */}
           <Route exact path="/">
-            {accessToken ? <Redirect to="/dashboard" /> : <Redirect to="/welcome" />}
+            {isAuthenticated  ? <Redirect to="/dashboard" /> : <Redirect to="/welcome" />}
           </Route>
         </IonRouterOutlet>
       </IonReactRouter>
@@ -85,11 +75,11 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
+    return (
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+    );
 };
 
 export default App;

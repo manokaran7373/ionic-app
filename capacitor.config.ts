@@ -6,6 +6,11 @@ const config = {
   plugins: {
     Geolocation: {
       permissions: true
+    },
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId: '618970500177-4ndf92sk3pck1t8hn0541nljbb6hj8ni.apps.googleusercontent.com',
+      forceCodeForRefreshToken: true
     }
   },
   server: {
