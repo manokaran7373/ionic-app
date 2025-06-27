@@ -36,10 +36,16 @@ import {
 import { useAuth } from '../../components/AuthContext';
 import AlertMessage from '../../components/AlertMessage';
 import { API_BASE_URL, API_ENDPOINTS } from '../../components/config/constants';
+import PaymentService from '../../services/PaymentService';
+import { RequestData } from '../../services/types/PaymentTypes';
+import usePaymentService from '../../services/PaymentService';
 
 const SatelliteRequest: React.FC = () => {
     const router = useIonRouter();
     const { axiosInstance } = useAuth();
+    const { handleAdvancePayment, handleFinalPayment } = PaymentService();
+    const [requestData, setRequestData] = useState<RequestData | null>(null);
+    const [paymentStep, setPaymentStep] = useState('initial');
 
     const [coordinates, setCoordinates] = useState({ latitude: '', longitude: '' });
     const [selectedPlan, setSelectedPlan] = useState('payasyougo');
@@ -49,7 +55,10 @@ const SatelliteRequest: React.FC = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [error, setError] = useState('');
-    const [requestData, setRequestData] = useState(null);
+    const [alert, setAlert] = useState<{
+        show: boolean;
+        message: string;
+    }>({ show: false, message: '' });
 
     const subscriptionPlans = [
         {
@@ -115,7 +124,7 @@ const SatelliteRequest: React.FC = () => {
         setError('');
 
         try {
-            const response = await axiosInstance.post(`${API_BASE_URL}${API_ENDPOINTS.SATELLITE_REQUEST}`, {
+            const response = await axiosInstance.post(`/${API_ENDPOINTS.SATELLITE_REQUEST}`, {
                 latitude: parseFloat(coordinates.latitude),
                 longitude: parseFloat(coordinates.longitude),
                 resolution: imageResolution,
@@ -125,23 +134,41 @@ const SatelliteRequest: React.FC = () => {
 
             if (response.data.status === 'success') {
                 setRequestData(response.data.data);
-                setShowSuccess(true);
+                setAlert({
+                    show: true,
+                    message: 'Request created successfully!'
+                });
                 setTimeout(() => {
-                    setShowSuccess(false);
+                    setAlert({ show: false, message: '' });
                     setShowConfirmation(true);
+
                 }, 2000);
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Request failed');
+            setError(err.response?.data?.message || 'Failed to submit request');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handlePayment = async () => {
-        setShowConfirmation(false);
-        // Implement payment logic here
-    };
+const handlePayment = async () => {
+  setShowConfirmation(false);
+
+  if (!requestData?.request_id) {
+    console.error('Request ID missing');
+    return;
+  }
+
+  await handleAdvancePayment(
+    { request_id: requestData.request_id },
+    {
+      setPaymentStep: (step) => console.log('Step:', step),
+      setAlert: setAlert,
+      setError: (err) => console.error(err)
+    }
+  );
+};
+
 
     return (
         <IonPage>
@@ -294,9 +321,59 @@ const SatelliteRequest: React.FC = () => {
                                     </>
                                 )}
                             </button>
+                            {error && (
+                                <div className="max-w-6xl mx-auto px-4 mt-3">
+                                    <p className="text-red-500 text-center text-sm md:text-base">{error}</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
+                <AlertMessage
+                    isOpen={alert.show}
+                    message={alert.message}
+                    onDidDismiss={() => setAlert({ ...alert, show: false })}
+                />
+
+                {showConfirmation && (
+                    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+                        <div className="bg-white/10 rounded-xl border border-gray-700 p-6 max-w-md w-full">
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-4 text-center">
+                                Confirm Advance Payment
+                            </h3>
+
+                            <div className="bg-white/10 p-4 rounded-lg text-center mb-4">
+                                <p className="text-gray-300 mb-1">Advance Payment Amount:</p>
+                                <p className="text-green-400 text-2xl md:text-3xl font-bold">
+                                    {subscriptionPlans.find(p => p.id === selectedPlan)?.advancePayment}
+                                </p>
+                                <p className="text-gray-400 text-sm">
+                                    50% of total amount ({subscriptionPlans.find(p => p.id === selectedPlan)?.price})
+                                </p>
+                            </div>
+
+                            <p className="text-gray-300 text-xs text-center mb-6">
+                                * After successful payment, image processing will take 3–4 weeks. We'll notify you once the images are ready.
+                            </p>
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setShowConfirmation(false)}
+                                    className="flex-1 px-4 py-2 border bg-red-600  rounded-lg text-white  text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePayment}
+                                    className="flex-1 px-4 py-2  bg-green-600  rounded-lg text-white font-semibold  text-sm"
+                                >
+                                    Pay Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
 
             </IonContent>
 

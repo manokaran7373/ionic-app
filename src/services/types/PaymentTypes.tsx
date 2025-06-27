@@ -24,4 +24,5 @@ export interface PaymentCallbacks {
     setSuccessMessage: (msg: string) => void;
     setError: (msg: string) => void;
     navigate?: (path: string) => void;
+    setAlert?: (alert: { show: boolean; message: string }) => void;
 }

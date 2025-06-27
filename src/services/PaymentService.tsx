@@ -1,22 +1,29 @@
 
 import { useState } from 'react';
 import { loadRazorpay } from './loadRazorpay';
-import { useIonRouter } from '@ionic/react';
-import { useAuth } from '../components/AuthContext';
 import { API_ENDPOINTS } from '../components/config/constants';
+import { useAuth } from '../components/AuthContext';
+import { useIonRouter } from '@ionic/react';
+import { PaymentData, RequestData } from './types/PaymentTypes';
 
-import { PaymentCallbacks, RequestData, PaymentData } from './types/PaymentTypes';
+export interface PaymentCallbacks {
+  setPaymentStep?: (step: string) => void;
+  setAlert?: (alertData: { show: boolean; message: string }) => void;
+  setShowSuccess?: (val: boolean) => void;
+  setSuccessMessage?: (msg: string) => void;
+  setError?: (err: string) => void;
+}
 
-const PaymentService = () => {
-  const router = useIonRouter();
+const usePaymentService = () => {
   const { axiosInstance } = useAuth();
-  const [alert, setAlert] = useState({ show: false, message: '' });
+  const router = useIonRouter();
+  const [requestData, setRequestData] = useState<RequestData | null>(null);
 
   const handleAdvancePayment = async (
     requestData: RequestData,
     callbacks: PaymentCallbacks
   ): Promise<void> => {
-    const { setPaymentStep } = callbacks;
+    const { setPaymentStep, setAlert, setError } = callbacks;
 
     try {
       const response = await axiosInstance.post(`/${API_ENDPOINTS.CREATE_ADVANCE_PAYMENT}`, {
@@ -39,11 +46,14 @@ const PaymentService = () => {
             });
 
             if (verifyResponse.data.status === 'success') {
-              setPaymentStep?.('processing');
-              setAlert({
+              setAlert?.({
                 show: true,
-                message: 'Advance payment successful! Your request is being processed.'
+                message: 'Payment successful! Redirecting to processing page...'
               });
+
+              setTimeout(() => {
+                router.push('/process-image', 'root');
+              }, 2000); // Delay to show alert message before navigating
             }
           }
         };
@@ -54,11 +64,13 @@ const PaymentService = () => {
       }
     } catch (error: any) {
       console.error('Advance payment error:', error);
+      setError?.('Failed to process payment');
     }
   };
 
+
   const handleFinalPayment = async (
-    paymentData: PaymentData,
+    paymentData: { payment_id: string },
     callbacks: PaymentCallbacks
   ): Promise<void> => {
     try {
@@ -67,6 +79,8 @@ const PaymentService = () => {
       });
 
       if (response.data.status === 'success') {
+        const rzp = await loadRazorpay();
+
         const options = {
           key: response.data.data.key,
           amount: response.data.data.amount,
@@ -82,32 +96,31 @@ const PaymentService = () => {
             });
 
             if (verifyResponse.data.status === 'success') {
-              setAlert({
-                show: true,
-                message: 'Payment completed! Redirecting to your images...'
-              });
-
+              callbacks.setShowSuccess?.(true);
+              callbacks.setSuccessMessage?.('Payment completed! Redirecting...');
               setTimeout(() => {
                 router.push('/satellite-map', 'root', 'replace');
               }, 2000);
             }
+          },
+          theme: {
+            color: '#38b2ac'
           }
         };
 
-        const rzp = await loadRazorpay();
         const paymentObject = new rzp(options);
         paymentObject.open();
       }
-    } catch (error: any) {
-      console.error('Final payment error:', error);
+    } catch (err: any) {
+      console.error('Final Payment Failed:', err);
+      callbacks.setError?.('Final payment failed. Please try again.');
     }
   };
 
-
   return {
     handleAdvancePayment,
-    handleFinalPayment,
+    handleFinalPayment
   };
 };
 
-export default PaymentService;
+export default usePaymentService;
