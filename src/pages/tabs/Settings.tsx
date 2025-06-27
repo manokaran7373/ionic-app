@@ -132,7 +132,7 @@ const Settings: React.FC = () => {
                     </div>
 
                     {/* Segment Control */}
-                    <IonSegment value={activeTab} onIonChange={e => setActiveTab(e.detail.value!)}>
+                    <IonSegment value={activeTab} onIonChange={e => setActiveTab(String(e.detail.value!))}>
                         <IonSegmentButton value="profile">
                             <IonIcon icon={personOutline} />
                             <IonLabel >Profile</IonLabel>
