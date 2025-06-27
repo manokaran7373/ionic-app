@@ -13,7 +13,7 @@ import Profile from './pages/tabs/Settings';
 import HelpScreen from './pages/tabs/Help';
 import FeedbackScreen from './pages/tabs/Feedback';
 import PaymentHistoryScreen from './pages/tabs/Subscriptions';
-// import ProcessScreen from './pages/tabs/ImageRequest';
+import ProcessScreen from './pages/tabs/ProcessImage';
 
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
@@ -66,13 +66,12 @@ const AppContent: React.FC = () => {
           
           {/* Protected Routes */}
           <Route exact path="/dashboard" component={Dashboard} />
-          {/* <Route exact path="/process-image" component={ProcessImage}/> */}
           <Route exact path="/dashboard/image-request" component={SatelliteRequest}/>
           <Route exact path="/settings" component={Profile}/>
           <Route exact path="/help" component={HelpScreen}/>
           <Route exact path="/feedback" component={FeedbackScreen}/>
           <Route exact path="/subscriptions" component={(PaymentHistoryScreen)}/>
-          {/* <Route exact path="/process-image" component={ProcessScreen}/> */}
+          <Route exact path="/process-image" component={ProcessScreen}/>
 
           
           

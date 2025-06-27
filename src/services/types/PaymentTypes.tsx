@@ -6,6 +6,7 @@ export interface RequestData {
 export interface PaymentData {
     payment_id: string;
     pending_amount?: number;
+    amount: number;
     latitude: string;
     longitude: string;
     coverage_area: string;

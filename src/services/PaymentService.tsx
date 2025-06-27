@@ -53,7 +53,7 @@ const usePaymentService = () => {
 
               setTimeout(() => {
                 router.push('/process-image', 'root');
-              }, 2000); // Delay to show alert message before navigating
+              }, 2000); 
             }
           }
         };
@@ -73,6 +73,7 @@ const usePaymentService = () => {
     paymentData: { payment_id: string },
     callbacks: PaymentCallbacks
   ): Promise<void> => {
+      const { setPaymentStep, setAlert, setError } = callbacks;
     try {
       const response = await axiosInstance.post(`/${API_ENDPOINTS.CREATE_FINAL_PAYMENT}`, {
         payment_id: paymentData.payment_id
@@ -96,8 +97,11 @@ const usePaymentService = () => {
             });
 
             if (verifyResponse.data.status === 'success') {
-              callbacks.setShowSuccess?.(true);
-              callbacks.setSuccessMessage?.('Payment completed! Redirecting...');
+            setAlert?.({
+                show: true,
+                message: 'Payment completed! Redirecting...'
+              });
+
               setTimeout(() => {
                 router.push('/satellite-map', 'root', 'replace');
               }, 2000);

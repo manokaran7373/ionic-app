@@ -29,6 +29,7 @@ import {
 } from 'ionicons/icons';
 import { useAuth } from '../components/AuthContext';
 import { useIonRouter } from '@ionic/react';
+import AlertMessage from '../components/AlertMessage';
 
 interface MenuItem {
     icon: string;
@@ -87,6 +88,7 @@ const menuItems: MenuItem[] = [
 const Sidebar: React.FC = () => {
     const { logout } = useAuth();
     const router = useIonRouter();
+
 
     const handleLogout = async () => {
         await logout();

@@ -1,10 +1,10 @@
-export const API_BASE_URL = 'https://geo-fencing-backendnew.onrender.com';
+export const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export const API_ENDPOINTS = {
   LOGIN: 'api/login/',
   SIGNUP: 'api/signup/',
   SATELLITE_REQUEST: 'api/request-satellite-image/',
-  GET_USER: 'api/get-user/',
+  GET_USER: 'api/get-user/',  
   UPDATE_PROFILE: 'api/update-profile/',
   CHANGE_PASSWORD: 'api/change-password/',
   USER_FEEDBACK: 'api/submit-feedback/',

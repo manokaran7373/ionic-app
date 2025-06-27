@@ -5,7 +5,9 @@ import {
     IonIcon,
     IonLabel,
     IonCheckbox,
+    useIonViewWillEnter
 } from '@ionic/react';
+import { useLocation } from 'react-router-dom';
 import {
     mailOutline,
     lockClosedOutline,
@@ -25,6 +27,7 @@ import { initializeGoogleAuth, signInWithGoogle } from '../components/config/goo
 
 const Login: React.FC = () => {
     const { login, axiosInstance } = useAuth();
+      const location = useLocation();
 
     const router = useIonRouter();
     const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +45,10 @@ const Login: React.FC = () => {
     }>({ show: false, message: '' });
     const [googleError, setGoogleError] = useState('');
 
+  
+
     useEffect(() => {
+        
         initializeGoogleAuth();
     }, []);
 
