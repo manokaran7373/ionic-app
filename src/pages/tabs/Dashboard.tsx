@@ -25,7 +25,7 @@ const Dashboard: React.FC = () => {
             title: "Land Calculator",
             description: "Instantly measure your land dimensions",
             icon: calculatorOutline,
-            route: "/land-calculator",
+            route: "/dashboard/land-calculator",
             bg: "bg-green-500/20",
             iconColor: "text-green-400"
         },
@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
             title: "Land Measurement",
             description: "Enter coordinates to search locations",
             icon: locationOutline,
-            route: "/land-measurement",
+            route: "/dashboard/land-measurement",
             bg: "bg-green-500/20",
             iconColor: "text-green-400"
         },

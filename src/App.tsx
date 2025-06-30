@@ -15,7 +15,8 @@ import FeedbackScreen from './pages/tabs/Feedback';
 import PaymentHistoryScreen from './pages/tabs/Subscriptions';
 import ProcessScreen from './pages/tabs/ProcessImage';
 import SatelliteMapView from './pages/tabs/SatelliteMap';
-
+import LandCalculatorScreen from './pages/Core/LandCalculator';
+import LandMeasurementScreen from './pages/Core/LandMeasurementScreen';
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
 }
@@ -68,6 +69,10 @@ const AppContent: React.FC = () => {
           {/* Protected Routes */}
           <Route exact path="/dashboard" component={Dashboard} />
           <Route exact path="/dashboard/image-request" component={SatelliteRequest}/>
+          <Route exact path="/dashboard/land-calculator" component={LandCalculatorScreen}/>
+          <Route exact path="/dashboard/land-measurement" component={LandMeasurementScreen}/>
+
+
           <Route exact path="/settings" component={Profile}/>
           <Route exact path="/help" component={HelpScreen}/>
           <Route exact path="/feedback" component={FeedbackScreen}/>

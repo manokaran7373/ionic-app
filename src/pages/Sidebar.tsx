@@ -1,9 +1,6 @@
-import React from 'react';
+import React ,{useState,useEffect} from 'react';
 import {
     IonMenu,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonList,
     IonItem,
@@ -12,25 +9,22 @@ import {
     IonMenuToggle,
     IonButton,
     IonAvatar,
-    IonText,
-    IonBadge
 } from '@ionic/react';
 import {
     locationOutline,
     searchOutline,
     imageOutline,
-    calculatorOutline,
-    cloudOutline,
     cardOutline,
     settingsOutline,
     helpCircleOutline,
     chatboxOutline,
     logOutOutline,
+    medalOutline
 } from 'ionicons/icons';
+
 import { useAuth } from '../components/AuthContext';
 import { useIonRouter } from '@ionic/react';
-import AlertMessage from '../components/AlertMessage';
-
+import { API_ENDPOINTS } from '../components/config/constants';
 interface MenuItem {
     icon: string;
     label: string;
@@ -82,17 +76,53 @@ const menuItems: MenuItem[] = [
         label: "Feedback",
         screen: "feedback",
         description: "Share your thoughts"
-    }
+    },
+
 ];
 
 const Sidebar: React.FC = () => {
-    const { logout } = useAuth();
+    const { logout,axiosInstance  } = useAuth();
     const router = useIonRouter();
+    const [userData, setUserData] = useState<any>(null);
+
+
+       useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axiosInstance.get(`/${API_ENDPOINTS.GET_USER}`);
+                if (response.data.status === 'success') {
+                    setUserData(response.data.data.user);
+                }   
+            } catch (error) {
+                console.log('Error fetching user data:', error);        
+            }
+        };
+        fetchUserData();
+    }, []);
+
+    const getInitials = () => {
+        if (userData?.first_name && userData?.last_name) {
+            return `${userData.first_name[0]}${userData.last_name[0]}`.toUpperCase();
+        }
+        return userData?.email?.[0].toUpperCase() || 'U';
+    };
+
+    const getDisplayName = () => {
+        if (userData?.first_name && userData?.last_name) {
+            return `${userData.first_name} ${userData.last_name}`;
+        }
+        return userData?.email || 'Loading...';
+    };
+
 
 
     const handleLogout = async () => {
         await logout();
         router.push('/welcome', 'root');
+    };
+    const handleGetImages = async () => {
+        await logout();
+        router.push('/dashboard/image-request', 'root');
     };
 
     const handleNavigation = (screen: string) => {
@@ -108,13 +138,18 @@ const Sidebar: React.FC = () => {
                     <div className="flex items-center space-x-3">
                         <IonAvatar className="w-12 h-12">
                             <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">MK</span>
+                                <span className="text-white font-bold text-lg">
+                                    {getInitials()}
+                                </span>
                             </div>
                         </IonAvatar>
-                        <div>
-                            <h3 className="text-lg font-semibold text-white bg-clip-text text-transparent">
-                                Welcome User
+                        <div className="flex flex-col">
+                            <h3 className="text-lg font-semibold text-white">
+                                {getDisplayName()}
                             </h3>
+                            <p className="text-sm text-gray-400">
+                                {userData?.email}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -155,18 +190,41 @@ const Sidebar: React.FC = () => {
                     ))}
                 </IonList>
 
-                {/* Logout Button */}
-                <div className="p-4 mt-4">
-                    <IonButton
-                        expand="block"
-                        fill="outline"
-                        onClick={handleLogout}
-                        className="logout-btn border-red-500 text-red-500 font-bold"
-                    >
-                        <IonIcon icon={logOutOutline} slot="start" />
-                        Logout
-                    </IonButton>
+                {/* Button Container */}
+                <div className="flex flex-col justify-end " style={{ minHeight: '100px' }}>
+                    {/* Premium */}
+                    <div className="p-4">
+                        <IonButton
+                            expand="block"
+                            className="premium-button"
+                            onClick={handleGetImages}
+                            style={{
+                                '--background': 'linear-gradient(to right, #FFD700, #FFA500)',
+                                '--color': '#000000',
+                                'fontWeight': 'bold',
+                                'borderRadius': '10px'
+                            }}
+                        >
+                            <IonIcon icon={medalOutline} slot="start" />
+                            Get Images
+                        </IonButton>
+                    </div>
+
+                    {/* Logout Button */}
+                    <div className="p-4">
+                        <IonButton
+                            expand="block"
+                            fill="outline"
+                            onClick={handleLogout}
+                            className="logout-btn border-red-500 text-red-500 font-bold"
+                        >
+                            <IonIcon icon={logOutOutline} slot="start" />
+                            Logout
+                        </IonButton>
+                    </div>
                 </div>
+
+
             </IonContent>
         </IonMenu>
     );

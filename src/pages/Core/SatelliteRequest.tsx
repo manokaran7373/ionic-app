@@ -197,36 +197,36 @@ const handlePayment = async () => {
                     </div>
 
                     {/* Location Input Section */}
-                    <div className="max-w-6xl mx-auto mb-8">
-                        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                            <div className="flex items-center gap-2 mb-6">
-                                <IonIcon icon={locationOutline} className="text-blue-400 text-xl" />
-                                <h2 className="text-xl font-semibold text-white">Location Coordinates</h2>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-gray-300 mb-2">Latitude</label>
-                                    <input
-                                        type="number"
-                                        value={coordinates.latitude}
-                                        onChange={(e) => setCoordinates({ ...coordinates, latitude: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
-                                        placeholder="Enter latitude"
-                                    />
+                        <div className="max-w-6xl mx-auto mb-8">
+                            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <IonIcon icon={locationOutline} className="text-blue-400 text-xl" />
+                                    <h2 className="text-xl font-semibold text-white">Location Coordinates</h2>
                                 </div>
-                                <div>
-                                    <label className="block text-gray-300 mb-2">Longitude</label>
-                                    <input
-                                        type="number"
-                                        value={coordinates.longitude}
-                                        onChange={(e) => setCoordinates({ ...coordinates, longitude: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
-                                        placeholder="Enter longitude"
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-gray-300 mb-2">Latitude</label>
+                                        <input
+                                            type="number"
+                                            value={coordinates.latitude}
+                                            onChange={(e) => setCoordinates({ ...coordinates, latitude: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                                            placeholder="Enter latitude"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-300 mb-2">Longitude</label>
+                                        <input
+                                            type="number"
+                                            value={coordinates.longitude}
+                                            onChange={(e) => setCoordinates({ ...coordinates, longitude: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                                            placeholder="Enter longitude"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
                     {/* Subscription Plans */}
                     <div className="max-w-6xl mx-auto mb-8">
