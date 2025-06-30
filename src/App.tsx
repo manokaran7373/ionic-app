@@ -14,6 +14,7 @@ import HelpScreen from './pages/tabs/Help';
 import FeedbackScreen from './pages/tabs/Feedback';
 import PaymentHistoryScreen from './pages/tabs/Subscriptions';
 import ProcessScreen from './pages/tabs/ProcessImage';
+import SatelliteMapView from './pages/tabs/SatelliteMap';
 
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
@@ -72,6 +73,7 @@ const AppContent: React.FC = () => {
           <Route exact path="/feedback" component={FeedbackScreen}/>
           <Route exact path="/subscriptions" component={(PaymentHistoryScreen)}/>
           <Route exact path="/process-image" component={ProcessScreen}/>
+          <Route exact path="/satellite-map" component={SatelliteMapView}/>
 
           
           

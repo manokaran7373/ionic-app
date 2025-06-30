@@ -1,5 +1,6 @@
 export const API_BASE_URL = 'http://127.0.0.1:8000';
 
+
 export const API_ENDPOINTS = {
   LOGIN: 'api/login/',
   SIGNUP: 'api/signup/',
@@ -13,7 +14,11 @@ export const API_ENDPOINTS = {
   CREATE_ADVANCE_PAYMENT: 'api/create-advance-payment/',
   VERIFY_ADVANCE_PAYMENT: 'api/verify-advance-payment/',
   CREATE_FINAL_PAYMENT: 'api/create-final-payment/',
-  VERIFY_FINAL_PAYMENT: 'api/verify-final-payment/'
+  VERIFY_FINAL_PAYMENT: 'api/verify-final-payment/',
+  GET_SAT_IMAGES:'api/satellite-images/'
+
 
 
 };
+
+export const GOOGLE_MAP_API_KEY ='AIzaSyAkAN7aQg74qr3FgIElfUlim7gqjTT0R6Q'
