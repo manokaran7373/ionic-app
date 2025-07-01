@@ -133,7 +133,7 @@ const SatelliteMapView: React.FC = () => {
                     <p className="text-gray-300 mb-6">{error}</p>
                     <button
                         onClick={() => history.push('/dashboard')}
-                        className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-xl"
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl"
                     >
                         Back to Dashboard
                     </button>

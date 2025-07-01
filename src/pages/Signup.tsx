@@ -18,7 +18,7 @@ import { isPlatform } from '@ionic/react';
 import AlertMessage from '../components/AlertMessage';
 import { useAuth } from '../components/AuthContext';
 import { useIonRouter } from '@ionic/react';
-import { useIonViewWillEnter } from '@ionic/react';
+import { initializeGoogleAuth} from '../components/config/googleAuth';
 
 
 
@@ -74,7 +74,7 @@ const Signup: React.FC = () => {
 
     useEffect(() => {
         // Initialize Google Auth
-        // initializeGoogleAuth();
+        initializeGoogleAuth();
 
         // Force clear form data on every mount
         const resetForm = () => {
@@ -105,6 +105,7 @@ const Signup: React.FC = () => {
         // Clear on unmount
         return () => resetForm();
     }, [router.routeInfo.pathname]); // Add router dependency to trigger on route changes
+
 
 
     const handleInputChange = (field: keyof FormData, value: string) => {

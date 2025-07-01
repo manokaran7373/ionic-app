@@ -70,7 +70,10 @@ const FeedbackScreen: React.FC = () => {
                                 {[1, 2, 3, 4, 5].map((starVal) => (
                                     <button
                                         key={starVal}
-                                        onClick={() => setRating(starVal)}
+                                        onClick={() => {
+                                            setRating(starVal);
+                                            setError('');
+                                        }}
                                         className="transition-transform hover:scale-110"
                                     >
                                         <IonIcon
@@ -95,7 +98,10 @@ const FeedbackScreen: React.FC = () => {
                             <textarea
                                 rows={4}
                                 value={comment}
-                                onChange={(e) => setComment(e.target.value)}
+                                onChange={(e) => {
+                                    setComment(e.target.value);
+                                    setError('');
+                                }}
                                 placeholder="Write your feedback here..."
                                 className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 text-sm resize-none"
                             />
@@ -107,9 +113,9 @@ const FeedbackScreen: React.FC = () => {
                             disabled={loading}
                             className={`w-full flex items-center justify-center gap-2 px-4 py-3
                             bg-gradient-to-r from-blue-500 to-purple-600
-                            hover:from-blue-600 hover:to-purple-700
+                           
                             text-white rounded-lg transition-all duration-300 font-semibold text-sm
-                            ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
+                            ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             <IonIcon icon={sendOutline} />
                             {loading ? 'Submitting...' : 'Submit Feedback'}

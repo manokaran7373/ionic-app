@@ -5,9 +5,7 @@ import {
     IonIcon,
     IonLabel,
     IonCheckbox,
-    useIonViewWillEnter
 } from '@ionic/react';
-import { useLocation } from 'react-router-dom';
 import {
     mailOutline,
     lockClosedOutline,
@@ -15,19 +13,20 @@ import {
     eyeOffOutline,
     arrowForwardOutline
 } from 'ionicons/icons';
+import { useLocation } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+import { isPlatform, useIonRouter } from '@ionic/react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import AlertMessage from '../components/AlertMessage';
 import { API_BASE_URL, API_ENDPOINTS } from '../components/config/constants';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { isPlatform, useIonRouter } from '@ionic/react';
-import { Link } from 'react-router-dom';
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { initializeGoogleAuth, signInWithGoogle } from '../components/config/googleAuth';
 
 
 const Login: React.FC = () => {
     const { login, axiosInstance } = useAuth();
-      const location = useLocation();
+    const location = useLocation();
 
     const router = useIonRouter();
     const [showPassword, setShowPassword] = useState(false);
@@ -45,12 +44,28 @@ const Login: React.FC = () => {
     }>({ show: false, message: '' });
     const [googleError, setGoogleError] = useState('');
 
-  
+
 
     useEffect(() => {
-        
+        // Reset error messages when the user navigates back to login
+        setErrors({});
+        setGoogleError('');
+        setAlert({ show: false, message: '' });
+
+        // 1. Initialize Google Auth
         initializeGoogleAuth();
-    }, []);
+
+        // 2. Retrieve saved credentials (if any)
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        const savedPassword = localStorage.getItem('rememberedPassword');
+
+        if (savedEmail && savedPassword) {
+            setEmail(savedEmail);
+            setPassword(savedPassword);
+            setRememberMe(true); // Check the checkbox if data exists
+        }
+    }, [location.pathname]);
+
 
     const validateForm = () => {
         const newErrors: typeof errors = {};
@@ -79,6 +94,14 @@ const Login: React.FC = () => {
             if (data.status === 'success') {
                 const { access, refresh } = data.data.tokens;
                 await login({ access, refresh });
+
+                if (rememberMe) {
+                    localStorage.setItem('rememberedEmail', email);
+                    localStorage.setItem('rememberedPassword', password);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                    localStorage.removeItem('rememberedPassword');
+                }
 
                 setAlert({
                     show: true,
@@ -176,7 +199,10 @@ const Login: React.FC = () => {
                                         <input
                                             type="email"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => {
+                                                setEmail(e.target.value);
+                                                setErrors(prev => ({ ...prev, email: undefined, general: undefined }));
+                                            }}
                                             placeholder="Enter your email"
                                             className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 text-base md:text-lg"
                                         />
@@ -199,7 +225,10 @@ const Login: React.FC = () => {
                                         <input
                                             type={showPassword ? "text" : "password"}
                                             value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
+                                            onChange={(e) => {
+                                                setPassword(e.target.value);
+                                                setErrors(prev => ({ ...prev, password: undefined, general: undefined }));
+                                            }}
                                             placeholder="Enter your password"
                                             className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 text-base md:text-lg"
                                         />
@@ -229,9 +258,13 @@ const Login: React.FC = () => {
                                         />
                                         <span className="text-sm md:text-base text-slate-300">Remember me</span>
                                     </div>
-                                    <button type="button" className="text-sm md:text-base text-blue-400 hover:text-blue-300">
+                                    <Link
+                                        to="/forgot-password"
+                                        className="text-sm md:text-base text-blue-400 hover:text-blue-300"
+                                    >
                                         Forgot Password?
-                                    </button>
+                                    </Link>
+
                                 </div>
 
                                 {/* Sign In Button */}

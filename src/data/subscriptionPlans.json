@@ -1,0 +1,57 @@
+[
+    {
+        "id": "payasyougo",
+        "name": "Pay As You Go",
+        "price": "₹5,000",
+        "advancePayment": "₹2,500",
+        "period": "per image",
+        "features": [
+            "Image processing time *3-4 weeks*",
+            "High-resolution satellite images",
+            "Instant download",
+            "Basic image formats (JPEG, PNG)",
+            "Standard processing time",
+            "Email support"
+        ],
+        "popular": false,
+        "color": "blue"
+    },
+    {
+        "id": "monthly",
+        "name": "Monthly Plan",
+        "price": "₹20,000",
+        "advancePayment": "₹10,000",
+        "period": "per month",
+        "features": [
+            "Image processing time *3-4 weeks*",
+            "Up to 10 high-resolution images",
+            "Priority processing",
+            "Multiple formats (JPEG, PNG, TIFF)",
+            "Historical imagery access",
+            "Advanced analytics tools",
+            "Priority email support"
+        ],
+        "popular": true,
+        "color": "green"
+    },
+    {
+        "id": "yearly",
+        "name": "Yearly Plan",
+        "price": "₹2,60,000",
+        "advancePayment": "₹1,30,000",
+        "period": "per year",
+        "features": [
+            "Image processing time *3-4 weeks*",
+            "Unlimited high-resolution images",
+            "Fastest processing priority",
+            "All formats including RAW",
+            "Complete historical archive",
+            "Advanced AI analytics",
+            "Custom area monitoring",
+            "Dedicated support manager",
+            "2 months free"
+        ],
+        "popular": false,
+        "color": "purple"
+    }
+]

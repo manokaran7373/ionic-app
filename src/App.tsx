@@ -17,6 +17,7 @@ import ProcessScreen from './pages/tabs/ProcessImage';
 import SatelliteMapView from './pages/tabs/SatelliteMap';
 import LandCalculatorScreen from './pages/Core/LandCalculator';
 import LandMeasurementScreen from './pages/Core/LandMeasurementScreen';
+import ForgotPasswordScreen from './pages/ForgotPasswordScreen';
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
 }
@@ -65,6 +66,7 @@ const AppContent: React.FC = () => {
           <Route exact path="/welcome" component={Welcome} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/signup" component={Signup} />
+          <Route exact path="/forgot-password" component={ForgotPasswordScreen}/>
           
           {/* Protected Routes */}
           <Route exact path="/dashboard" component={Dashboard} />

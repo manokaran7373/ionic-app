@@ -4,8 +4,8 @@ const config = {
   appName: 'geofencing',
   webDir: 'dist',
   plugins: {
-    Geolocation: {
-      permissions: true
+     "Geolocation": {
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     GoogleAuth: {
       scopes: ['profile', 'email'],

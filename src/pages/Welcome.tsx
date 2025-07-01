@@ -3,6 +3,7 @@ import {
     IonPage,
     IonContent,
     IonIcon,
+    IonAlert,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { Geolocation } from '@capacitor/geolocation';
@@ -17,6 +18,8 @@ const Welcome: React.FC = () => {
     const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(() => {
         return localStorage.getItem('policyAccepted') === 'true';
     });
+    const [showLocationAlert, setShowLocationAlert] = useState(false);
+    const [locationError, setLocationError] = useState('');
 
 
     useEffect(() => {
@@ -54,35 +57,100 @@ const Welcome: React.FC = () => {
     };
 
     const requestLocationPermission = async () => {
-    if (Capacitor.isNativePlatform()) {
         try {
-            const permissionStatus = await Geolocation.checkPermissions();
-            
-            if (permissionStatus.location === 'granted') {
-                // Location already enabled, go directly to login
-                history.push('/login');
+            if (Capacitor.isNativePlatform()) {
+                console.log('Native platform detected');
+                
+                // First check current permissions
+                const permissionStatus = await Geolocation.checkPermissions();
+                console.log('Current permission status:', permissionStatus);
+
+                if (permissionStatus.location === 'granted') {
+                    console.log('Permission already granted');
+                    // Test location access
+                    await testLocationAccess();
+                } else if (permissionStatus.location === 'denied') {
+                    // Permission was denied, show alert to go to settings
+                    setLocationError('Location permission was denied. Please enable location access in your device settings to continue.');
+                    setShowLocationAlert(true);
+                    return;
+                } else {
+                    // Permission not determined, request it
+                    console.log('Requesting location permission...');
+                    const permission = await Geolocation.requestPermissions();
+                    console.log('Permission request result:', permission);
+                    
+                    if (permission.location === 'granted') {
+                        await testLocationAccess();
+                    } else if (permission.location === 'denied') {
+                        setLocationError('Location permission is required for this app to function properly. Please enable location access in your device settings.');
+                        setShowLocationAlert(true);
+                    } else {
+                        setLocationError('Location permission was not granted. Some features may not work properly.');
+                        setShowLocationAlert(true);
+                    }
+                }
             } else {
-                // Request permission only if not granted
-                const permission = await Geolocation.requestPermissions();
-                if (permission.location === 'granted') {
-                    history.push('/login');
+                // Web platform handling
+                console.log('Web platform detected');
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            console.log('Web location access successful:', position);
+                            history.push('/login');
+                        },
+                        (error) => {
+                            console.log('Web location error:', error);
+                            setLocationError('Location access failed. Please enable location services in your browser.');
+                            setShowLocationAlert(true);
+                        },
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                    );
+                } else {
+                    console.log('Geolocation not supported');
+                    setLocationError('Geolocation is not supported by this browser.');
+                    setShowLocationAlert(true);
                 }
             }
         } catch (error) {
-            console.log('Location error:', error);
+            console.error('Location permission error:', error);
+            setLocationError('An error occurred while requesting location permission. Please try again.');
+            setShowLocationAlert(true);
         }
-    } else {
-        // Web platform handling
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                () => history.push('/login'),
-                (error) => console.log('Web location error:', error)
-            );
+    };
+
+    const testLocationAccess = async () => {
+        try {
+            console.log('Testing location access...');
+            const position = await Geolocation.getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 10000
+            });
+            console.log('Location access successful:', position);
+            history.push('/login');
+        } catch (error) {
+            console.error('Location access test failed:', error);
+            setLocationError('Unable to access location. Please ensure location services are enabled and try again.');
+            setShowLocationAlert(true);
         }
-    }
-};
+    };
 
+    const handleLocationAlertDismiss = () => {
+        setShowLocationAlert(false);
+        // Still proceed to login even if location fails
+        history.push('/login');
+    };
 
+    const handleOpenSettings = () => {
+        setShowLocationAlert(false);
+        // On mobile, this would typically open the app settings
+        if (Capacitor.isNativePlatform()) {
+            // You might want to use a plugin like @capacitor/app to open settings
+            setLocationError('Please manually enable location permission in your device settings for this app.');
+        }
+        // Still proceed to login
+        history.push('/login');
+    };
 
     return (
         <IonPage>
@@ -164,6 +232,32 @@ const Welcome: React.FC = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* Location Permission Alert */}
+                    <IonAlert
+                        isOpen={showLocationAlert}
+                        onDidDismiss={handleLocationAlertDismiss}
+                        header="Location Permission"
+                        message={locationError}
+                        buttons={[
+                            {
+                                text: 'Skip',
+                                role: 'cancel',
+                                handler: handleLocationAlertDismiss
+                            },
+                            {
+                                text: 'Settings',
+                                handler: handleOpenSettings
+                            },
+                            {
+                                text: 'Try Again',
+                                handler: () => {
+                                    setShowLocationAlert(false);
+                                    requestLocationPermission();
+                                }
+                            }
+                        ]}
+                    />
                 </div>
             </IonContent>
         </IonPage>

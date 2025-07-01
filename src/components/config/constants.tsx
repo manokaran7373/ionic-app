@@ -4,6 +4,8 @@ export const API_BASE_URL = 'http://127.0.0.1:8000';
 export const API_ENDPOINTS = {
   LOGIN: 'api/login/',
   SIGNUP: 'api/signup/',
+  FORGOT_PASSWORD:'api/forgot-password/',
+  FORGOT_PASSWORD_VERIFY_OTP:'api/verify-otp/',
   SATELLITE_REQUEST: 'api/request-satellite-image/',
   GET_USER: 'api/get-user/',  
   UPDATE_PROFILE: 'api/update-profile/',

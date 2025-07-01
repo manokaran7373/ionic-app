@@ -7,38 +7,23 @@ import {
     IonTitle,
     IonButtons,
     IonBackButton,
-    IonCard,
-    IonCardContent,
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonSelect,
-    IonSelectOption,
-    IonButton,
     IonIcon,
     IonSpinner,
-    IonCheckbox,
-    IonModal,
     useIonRouter,
 } from '@ionic/react';
-import { MdStar } from 'react-icons/md';
 
 import {
     radioOutline,
     locationOutline,
-    scanOutline,
-    cardOutline,
     checkmarkCircleOutline,
-    starOutline,
-    eyeOutline,
-    cloudOutline
 } from 'ionicons/icons';
 import { useAuth } from '../../components/AuthContext';
 import AlertMessage from '../../components/AlertMessage';
-import { API_BASE_URL, API_ENDPOINTS } from '../../components/config/constants';
+import { API_ENDPOINTS } from '../../components/config/constants';
 import PaymentService from '../../services/PaymentService';
 import { RequestData } from '../../services/types/PaymentTypes';
-import usePaymentService from '../../services/PaymentService';
+import subscriptionPlansData from '../../data/subscriptionPlans.json';
+
 
 const SatelliteRequest: React.FC = () => {
     const router = useIonRouter();
@@ -57,66 +42,10 @@ const SatelliteRequest: React.FC = () => {
     const [error, setError] = useState('');
     const [alert, setAlert] = useState<{
         show: boolean;
-        message: string;
+        message: string;    
     }>({ show: false, message: '' });
 
-    const subscriptionPlans = [
-        {
-            id: 'payasyougo',
-            name: 'Pay As You Go',
-            price: '₹5,000',
-            advancePayment: '₹2,500',
-            period: 'per image',
-            features: [
-                'Image processing time *3-4 weeks*',
-                'High-resolution satellite images',
-                'Instant download',
-                'Basic image formats (JPEG, PNG)',
-                'Standard processing time',
-                'Email support'
-            ],
-            popular: false,
-            color: 'blue'
-        },
-        {
-            id: 'monthly',
-            name: 'Monthly Plan',
-            price: '₹20,000',
-            advancePayment: '₹10,000',
-            period: 'per month',
-            features: [
-                'Image processing time *3-4 weeks*',
-                'Up to 10 high-resolution images',
-                'Priority processing',
-                'Multiple formats (JPEG, PNG, TIFF)',
-                'Historical imagery access',
-                'Advanced analytics tools',
-                'Priority email support'
-            ],
-            popular: true,
-            color: 'green'
-        },
-        {
-            id: 'yearly',
-            name: 'Yearly Plan',
-            price: '₹2,60,000',
-            advancePayment: '₹1,30,000',
-            period: 'per year',
-            features: [
-                'Image processing time *3-4 weeks*',
-                'Unlimited high-resolution images',
-                'Fastest processing priority',
-                'All formats including RAW',
-                'Complete historical archive',
-                'Advanced AI analytics',
-                'Custom area monitoring',
-                'Dedicated support manager',
-                '2 months free'
-            ],
-            popular: false,
-            color: 'purple'
-        }
-    ];
+    const subscriptionPlans = subscriptionPlansData;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

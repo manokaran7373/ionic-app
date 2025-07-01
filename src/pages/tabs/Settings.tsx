@@ -165,7 +165,10 @@ const Settings: React.FC = () => {
                                             label="First Name"
                                             labelPlacement="floating"
                                             value={userProfile.fname}
-                                            onIonChange={e => setUserProfile({ ...userProfile, fname: e.detail.value! })}
+                                            onIonChange={e => {
+                                                setUserProfile({ ...userProfile, fname: e.detail.value! });
+                                                setErrors((prev: any) => ({ ...prev, profile: undefined }));
+                                            }}
                                             disabled={!isEditing}
                                         />
                                     </IonItem>
@@ -175,7 +178,10 @@ const Settings: React.FC = () => {
                                             label="Last Name"
                                             labelPlacement="floating"
                                             value={userProfile.lname}
-                                            onIonChange={e => setUserProfile({ ...userProfile, lname: e.detail.value! })}
+                                            onIonChange={e => {
+                                                setUserProfile({ ...userProfile, lname: e.detail.value! });
+                                                setErrors((prev: any) => ({ ...prev, profile: undefined }));
+                                            }}
                                             disabled={!isEditing}
                                         />
                                     </IonItem>
@@ -197,7 +203,10 @@ const Settings: React.FC = () => {
                                             label="Phone"
                                             labelPlacement="floating"
                                             value={userProfile.phone}
-                                            onIonChange={e => setUserProfile({ ...userProfile, phone: e.detail.value! })}
+                                            onIonChange={e => {
+                                                setUserProfile({ ...userProfile, phone: e.detail.value! });
+                                                setErrors((prev: any) => ({ ...prev, profile: undefined }));
+                                            }}
                                             disabled={!isEditing}
                                             type="tel"
                                         />
@@ -208,10 +217,13 @@ const Settings: React.FC = () => {
                                 </IonList>
 
                                 {isEditing && (
-                                    <IonButton  expand="block" onClick={handleProfileUpdate}>
-                                        <IonIcon className='' slot="start" icon={saveOutline} />
-                                        Save Changes
-                                    </IonButton>
+                                    <button
+                                        onClick={handleProfileUpdate}
+                                        className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold text-base flex items-center justify-center space-x-2 hover:opacity-90 transition-opacity mt-4"
+                                    >
+                                        <IonIcon icon={saveOutline} />
+                                        <span>Save Changes</span>
+                                    </button>
                                 )}
                             </div>
                         )}
@@ -227,7 +239,10 @@ const Settings: React.FC = () => {
                                             labelPlacement="floating"
                                             type={showPassword ? "text" : "password"}
                                             value={passwordData.currentPassword}
-                                            onIonChange={e => setPasswordData({ ...passwordData, currentPassword: e.detail.value! })}
+                                            onIonChange={e => {
+                                                setPasswordData({ ...passwordData, currentPassword: e.detail.value! });
+                                                setErrors((prev: any) => ({ ...prev, password: undefined }));
+                                            }}
                                         />
                                         <IonIcon
                                             slot="end"
@@ -244,7 +259,10 @@ const Settings: React.FC = () => {
                                             labelPlacement="floating"
                                             type={showNewPassword ? "text" : "password"}
                                             value={passwordData.newPassword}
-                                            onIonChange={e => setPasswordData({ ...passwordData, newPassword: e.detail.value! })}
+                                            onIonChange={e => {
+                                                setPasswordData({ ...passwordData, newPassword: e.detail.value! });
+                                                setErrors((prev: any) => ({ ...prev, password: undefined }));
+                                            }}
                                         />
                                         <IonIcon
                                             slot="end"
@@ -261,7 +279,10 @@ const Settings: React.FC = () => {
                                             labelPlacement="floating"
                                             type={showConfirmPassword ? "text" : "password"}
                                             value={passwordData.confirmPassword}
-                                            onIonChange={e => setPasswordData({ ...passwordData, confirmPassword: e.detail.value! })}
+                                            onIonChange={e => {
+                                                setPasswordData({ ...passwordData, confirmPassword: e.detail.value! });
+                                                setErrors((prev: any) => ({ ...prev, password: undefined }));
+                                            }}
                                         />
                                         <IonIcon
                                             slot="end"
@@ -272,10 +293,13 @@ const Settings: React.FC = () => {
                                     </IonItem>
 
                                     <div className="mt-6">
-                                        <IonButton expand="block" onClick={handlePasswordChange}>
-                                            <IonIcon slot="start" icon={saveOutline} />
-                                            Update Password
-                                        </IonButton>
+                                        <button
+                                            onClick={handlePasswordChange}
+                                            className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold text-base flex items-center justify-center space-x-2 hover:opacity-90 transition-opacity"
+                                        >
+                                            <IonIcon icon={saveOutline} />
+                                            <span>Update Password</span>
+                                        </button>
                                         {errors.password && (
                                             <div className="text-red-500 text-sm md:text-base text-center mt-1">{errors.password}</div>
                                         )}
