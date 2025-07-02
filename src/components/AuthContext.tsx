@@ -9,6 +9,7 @@
     isAuthenticated: boolean;
     login: (tokens: { access: string; refresh: string }) => Promise<void>;
     logout: () => Promise<void>;
+    initializeAuth: () => Promise<void>;
     axiosInstance: AxiosInstance;
   }
 
@@ -16,7 +17,7 @@
   const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
   // Create Axios instance
-  const axiosInstance = axios.create({
+  const axiosInstance = axios.create({  
     baseURL: API_BASE_URL,
     timeout: 5000,
     headers: { 'Content-Type': 'application/json' },
@@ -62,6 +63,11 @@
     const router = useIonRouter();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
+  const initializeAuth = async () => {
+    const { value: token } = await Preferences.get({ key: 'accessToken' });
+    setIsAuthenticated(!!token);
+  };
+
     useEffect(() => {
       const checkAuth = async () => {
         const { value: token } = await Preferences.get({ key: 'accessToken' });
@@ -84,7 +90,7 @@
     };
 
     return (
-      <AuthContext.Provider value={{ isAuthenticated, login, logout, axiosInstance }}>
+      <AuthContext.Provider value={{ isAuthenticated, login, logout, axiosInstance, initializeAuth, }}>
         {children}
       </AuthContext.Provider>
     );

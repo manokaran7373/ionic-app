@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonContent, IonPage, IonIcon } from '@ionic/react';
+import { IonContent, IonPage, IonIcon, useIonRouter } from '@ionic/react';
 import {
     personOutline,
     mailOutline,
@@ -9,17 +9,18 @@ import {
     arrowForwardOutline,
     callOutline
 } from 'ionicons/icons';
-import { FcGoogle } from 'react-icons/fc';
 import { Link, useHistory } from 'react-router-dom';
-import { API_BASE_URL, API_ENDPOINTS } from '../components/config/constants';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-// import { initializeGoogleAuth } from '../components/config/googleAuth';
-import { isPlatform } from '@ionic/react';
 import AlertMessage from '../components/AlertMessage';
 import { useAuth } from '../components/AuthContext';
-import { useIonRouter } from '@ionic/react';
-import { initializeGoogleAuth} from '../components/config/googleAuth';
+import { API_BASE_URL, API_ENDPOINTS } from '../components/config/constants';
 
+// import { FcGoogle } from 'react-icons/fc';
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+
+// import { initializeGoogleAuth } from '../components/config/googleAuth';
+// import { isPlatform } from '@ionic/react';
+
+// import { initializeGoogleAuth} from '../components/config/googleAuth';
 
 
 interface FormData {
@@ -35,10 +36,11 @@ interface FormErrors {
     [key: string]: string;
 }
 
+
 const Signup: React.FC = () => {
-    const { login, axiosInstance } = useAuth();
+    // const { login, axiosInstance } = useAuth();
     const router = useIonRouter();
-    const history = useHistory();
+    // const history = useHistory();
     const [formData, setFormData] = useState({
         fname: '',
         lname: '',
@@ -54,27 +56,14 @@ const Signup: React.FC = () => {
         show: boolean;
         message: string;
     }>({ show: false, message: '' });
-    const [googleError, setGoogleError] = useState('');
+    // const [googleError, setGoogleError] = useState('');
 
 
-
-    interface FormData {
-        fname: string;
-        lname: string;
-        email: string;
-        phone: string;
-        password: string;
-        confirm_password: string;
-    }
-
-    interface FormErrors {
-        [key: string]: string;
-    }
 
 
     useEffect(() => {
         // Initialize Google Auth
-        initializeGoogleAuth();
+        // initializeGoogleAuth();
 
         // Force clear form data on every mount
         const resetForm = () => {
@@ -163,45 +152,45 @@ const Signup: React.FC = () => {
         }
     };
 
-    const handleGoogleSignup = async () => {
-        try {
-            const googleUser = await GoogleAuth.signIn();
-            const googleToken = googleUser.authentication.idToken;
+    // const handleGoogleSignup = async () => {
+    //     try {
+    //         const googleUser = await GoogleAuth.signIn();
+    //         const googleToken = googleUser.authentication.idToken;
 
-            const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.LOGIN}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    google_token: googleToken,
-                    platform: isPlatform('android') ? 'android' : 'web'
-                })
-            });
+    //         const response = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.LOGIN}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 google_token: googleToken,
+    //                 platform: isPlatform('android') ? 'android' : 'web'
+    //             })
+    //         });
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if (data.status === 'success') {
-                const { access, refresh } = data.data.tokens;
+    //         if (data.status === 'success') {
+    //             const { access, refresh } = data.data.tokens;
 
-                // First store tokens
-                await login({ access, refresh });
+    //             // First store tokens
+    //             await login({ access, refresh });
 
-                // Show success message
-                setAlert({
-                    show: true,
-                    message: 'Google Login successful!'
-                });
+    //             // Show success message
+    //             setAlert({
+    //                 show: true,
+    //                 message: 'Google Login successful!'
+    //             });
 
-                // Force navigation after a brief delay
-                setTimeout(() => {
-                    router.push('/dashboard', 'root', 'replace');
-                }, 2000);
-            }
-        } catch (error: any) {
-            setGoogleError(error.response?.data?.message || 'Google authentication failed');
-        }
-    };
+    //             // Force navigation after a brief delay
+    //             setTimeout(() => {
+    //                 router.push('/dashboard', 'root', 'replace');
+    //             }, 2000);
+    //         }
+    //     } catch (error: any) {
+    //         setGoogleError(error.response?.data?.message || 'Google authentication failed');
+    //     }
+    // };
 
     return (
         <IonPage>
@@ -395,7 +384,7 @@ const Signup: React.FC = () => {
                                 )}
 
                                 {/* Divider */}
-                                <div className="relative my-6 md:my-8">
+                                {/* <div className="relative my-6 md:my-8">
                                     <div className="absolute inset-0 flex items-center">
                                         <div className="w-full border-t border-slate-600"></div>
                                     </div>
@@ -404,10 +393,10 @@ const Signup: React.FC = () => {
                                             Or continue with
                                         </span>
                                     </div>
-                                </div>
+                                </div> */}
 
                                 {/* Google Sign Up */}
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={handleGoogleSignup}
                                     className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl text-white font-medium text-base md:text-lg flex items-center justify-center space-x-3 hover:bg-white/10 transition-colors"
@@ -415,11 +404,12 @@ const Signup: React.FC = () => {
                                     <FcGoogle size={24} />
                                     <span>Continue with Google</span>
                                 </button>
+
                                 {googleError && (
                                     <div className="text-red-500 text-sm md:text-base text-center mt-1">
                                         {googleError}
                                     </div>
-                                )}
+                                )} */}
                             </form>
                         </div>
 

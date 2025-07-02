@@ -1,14 +1,15 @@
+import { useEffect, useState } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import { RouteProps, RouteComponentProps } from 'react-router-dom';
 import Welcome from './pages/Welcome';
+import RestartLoaderScreen from './pages/RestartLoaderScreen';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/tabs/Dashboard';
 import SatelliteRequest from './pages/Core/SatelliteRequest';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import Profile from './pages/tabs/Settings';
 import HelpScreen from './pages/tabs/Help';
 import FeedbackScreen from './pages/tabs/Feedback';
@@ -18,6 +19,7 @@ import SatelliteMapView from './pages/tabs/SatelliteMap';
 import LandCalculatorScreen from './pages/Core/LandCalculator';
 import LandMeasurementScreen from './pages/Core/LandMeasurementScreen';
 import ForgotPasswordScreen from './pages/ForgotPasswordScreen';
+import { Preferences } from '@capacitor/preferences';
 interface PrivateRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<RouteComponentProps>;
 }
@@ -56,7 +58,38 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ component: Component, ...re
 };
 
 const AppContent: React.FC = () => {
-  const { isAuthenticated  } = useAuth();
+  const { isAuthenticated, initializeAuth } = useAuth();
+  const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+
+  useEffect(() => {
+    const checkAppState = async () => {
+      try {
+        // Check if it's first launch
+        const { value: hasLaunched } = await Preferences.get({ key: 'hasLaunched' });
+        setIsFirstLaunch(!hasLaunched);
+        
+        if (!hasLaunched) {
+          await Preferences.set({ key: 'hasLaunched', value: 'true' });
+        }
+
+        // Initialize auth state
+        await initializeAuth();
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error checking app state:', error);
+        setIsLoading(false);
+      }
+    };
+
+    checkAppState();
+  }, []);
+
+  if (isLoading) {
+    return null; // or a loading spinner
+  }
+
 
   return (
     <IonApp>
@@ -64,6 +97,7 @@ const AppContent: React.FC = () => {
         <IonRouterOutlet>
           {/* Public Routes */}
           <Route exact path="/welcome" component={Welcome} />
+          <Route exact path="/restart" component={RestartLoaderScreen}/>
           <Route exact path="/login" component={Login} />
           <Route exact path="/signup" component={Signup} />
           <Route exact path="/forgot-password" component={ForgotPasswordScreen}/>
@@ -73,8 +107,6 @@ const AppContent: React.FC = () => {
           <Route exact path="/dashboard/image-request" component={SatelliteRequest}/>
           <Route exact path="/dashboard/land-calculator" component={LandCalculatorScreen}/>
           <Route exact path="/dashboard/land-measurement" component={LandMeasurementScreen}/>
-
-
           <Route exact path="/settings" component={Profile}/>
           <Route exact path="/help" component={HelpScreen}/>
           <Route exact path="/feedback" component={FeedbackScreen}/>
@@ -84,10 +116,17 @@ const AppContent: React.FC = () => {
 
           
           
-          {/* Default Route */}
+            {/* Default Route */}
           <Route exact path="/">
-            {isAuthenticated  ? <Redirect to="/dashboard" /> : <Redirect to="/welcome" />}
+            {isFirstLaunch ? (
+              <Redirect to="/welcome" />
+            ) : isAuthenticated ? (
+              <Redirect to="/restart" />
+            ) : (
+              <Redirect to="/login" />
+            )}
           </Route>
+
         </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>
