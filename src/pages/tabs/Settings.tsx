@@ -40,14 +40,12 @@ const Settings: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState({ show: false, message: '' });
     const [errors, setErrors] = useState<any>({});
-
     const [userProfile, setUserProfile] = useState({
         fname: '',
         lname: '',
         email: '',
         phone: ''
     });
-
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -89,11 +87,9 @@ const Settings: React.FC = () => {
                 show: true,
                 message: 'Profile updated successfully!'
             });
-
             setTimeout(() => {
                 router.push('/settings', 'root', 'replace');
             }, 2000);
-
         } catch (error: any) {
             setErrors({ profile: error.response?.data?.message || 'Failed to update profile' });
         }
@@ -118,37 +114,38 @@ const Settings: React.FC = () => {
 
     return (
         <ProtectedLayout title="Settings">
-
             <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 font-inter p-4 md:p-8">
-                <div className="max-w-6xl mx-auto p-4">
+                <div className="w-full max-w-4xl mx-auto">
                     {/* Header */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-2xl md:text-4xl font-bold text-white mb-4">
+                    <div className="text-center mb-6 md:mb-8">
+                        <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 md:mb-4">
                             My Account
                         </h1>
                         <p className="text-gray-300 text-sm md:text-lg">
                             Manage and update your personal information
                         </p>
                     </div>
-
+                    
                     {/* Segment Control */}
-                    <IonSegment value={activeTab} onIonChange={e => setActiveTab(String(e.detail.value!))}>
-                        <IonSegmentButton value="profile">
-                            <IonIcon icon={personOutline} />
-                            <IonLabel >Profile</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton value="security">
-                            <IonIcon icon={shieldOutline} />
-                            <IonLabel>Security</IonLabel>
-                        </IonSegmentButton>
-                    </IonSegment>
+                    <div className="mb-4 md:mb-6">
+                        <IonSegment value={activeTab} onIonChange={e => setActiveTab(String(e.detail.value!))}>
+                            <IonSegmentButton value="profile">
+                                <IonIcon icon={personOutline} />
+                                <IonLabel>Profile</IonLabel>
+                            </IonSegmentButton>
+                            <IonSegmentButton value="security">
+                                <IonIcon icon={shieldOutline} />
+                                <IonLabel>Security</IonLabel>
+                            </IonSegmentButton>
+                        </IonSegment>
+                    </div>
 
                     {/* Content Area */}
-                    <div className="mt-6">
+                    <div className="w-full">
                         {activeTab === 'profile' && (
-                            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-semibold text-white">Profile Information</h2>
+                            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6">
+                                <div className="flex justify-between items-center mb-4 md:mb-6">
+                                    <h2 className="text-lg md:text-xl font-semibold text-white">Profile Information</h2>
                                     <IonButton
                                         fill="clear"
                                         onClick={() => setIsEditing(!isEditing)}
@@ -157,7 +154,6 @@ const Settings: React.FC = () => {
                                         {isEditing ? 'Cancel' : 'Edit'}
                                     </IonButton>
                                 </div>
-
                                 <IonList className="bg-transparent">
                                     <IonItem className="bg-transparent">
                                         <IonIcon icon={personOutline} slot="start" />
@@ -185,7 +181,6 @@ const Settings: React.FC = () => {
                                             disabled={!isEditing}
                                         />
                                     </IonItem>
-
                                     <IonItem className="bg-transparent">
                                         <IonIcon icon={mailOutline} slot="start" />
                                         <IonInput
@@ -196,7 +191,6 @@ const Settings: React.FC = () => {
                                             type="email"
                                         />
                                     </IonItem>
-
                                     <IonItem className="bg-transparent">
                                         <IonIcon icon={callOutline} slot="start" />
                                         <IonInput
@@ -211,11 +205,7 @@ const Settings: React.FC = () => {
                                             type="tel"
                                         />
                                     </IonItem>
-
-
-                                    {/* Add similar IonItem components for other profile fields */}
                                 </IonList>
-
                                 {isEditing && (
                                     <button
                                         onClick={handleProfileUpdate}
@@ -227,72 +217,74 @@ const Settings: React.FC = () => {
                                 )}
                             </div>
                         )}
-
+                        
                         {activeTab === 'security' && (
-                            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-6">
-                                <h2 className="text-xl font-semibold text-white mb-6">Change Password</h2>
-                                <IonList className="bg-transparent">
-                                    <IonItem className="bg-transparent">
-                                        <IonIcon icon={lockClosedOutline} slot="start" />
-                                        <IonInput
-                                            label="Current Password"
-                                            labelPlacement="floating"
-                                            type={showPassword ? "text" : "password"}
-                                            value={passwordData.currentPassword}
-                                            onIonChange={e => {
-                                                setPasswordData({ ...passwordData, currentPassword: e.detail.value! });
-                                                setErrors((prev: any) => ({ ...prev, password: undefined }));
-                                            }}
-                                        />
-                                        <IonIcon
-                                            slot="end"
-                                            icon={showPassword ? eyeOffOutline : eyeOutline}
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="cursor-pointer"
-                                        />
-                                    </IonItem>
-
-                                    <IonItem className="bg-transparent">
-                                        <IonIcon icon={lockClosedOutline} slot="start" />
-                                        <IonInput
-                                            label="New Password"
-                                            labelPlacement="floating"
-                                            type={showNewPassword ? "text" : "password"}
-                                            value={passwordData.newPassword}
-                                            onIonChange={e => {
-                                                setPasswordData({ ...passwordData, newPassword: e.detail.value! });
-                                                setErrors((prev: any) => ({ ...prev, password: undefined }));
-                                            }}
-                                        />
-                                        <IonIcon
-                                            slot="end"
-                                            icon={showNewPassword ? eyeOffOutline : eyeOutline}
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            className="cursor-pointer"
-                                        />
-                                    </IonItem>
-
-                                    <IonItem className="bg-transparent">
-                                        <IonIcon icon={lockClosedOutline} slot="start" />
-                                        <IonInput
-                                            label="Confirm New Password"
-                                            labelPlacement="floating"
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            value={passwordData.confirmPassword}
-                                            onIonChange={e => {
-                                                setPasswordData({ ...passwordData, confirmPassword: e.detail.value! });
-                                                setErrors((prev: any) => ({ ...prev, password: undefined }));
-                                            }}
-                                        />
-                                        <IonIcon
-                                            slot="end"
-                                            icon={showConfirmPassword ? eyeOffOutline : eyeOutline}
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="cursor-pointer"
-                                        />
-                                    </IonItem>
-
-                                    <div className="mt-6">
+                            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6">
+                                <h2 className="text-lg md:text-xl font-semibold text-white mb-4 md:mb-6">Change Password</h2>
+                                <div className="space-y-4">
+                                    <IonList className="bg-transparent">
+                                        <IonItem className="bg-transparent mb-2">
+                                            <IonIcon icon={lockClosedOutline} slot="start" />
+                                            <IonInput
+                                                label="Current Password"
+                                                labelPlacement="floating"
+                                                type={showPassword ? "text" : "password"}
+                                                value={passwordData.currentPassword}
+                                                onIonChange={e => {
+                                                    setPasswordData({ ...passwordData, currentPassword: e.detail.value! });
+                                                    setErrors((prev: any) => ({ ...prev, password: undefined }));
+                                                }}
+                                            />
+                                            <IonIcon
+                                                slot="end"
+                                                icon={showPassword ? eyeOffOutline : eyeOutline}
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="cursor-pointer"
+                                            />
+                                        </IonItem>
+                                        
+                                        <IonItem className="bg-transparent mb-2">
+                                            <IonIcon icon={lockClosedOutline} slot="start" />
+                                            <IonInput
+                                                label="New Password"
+                                                labelPlacement="floating"
+                                                type={showNewPassword ? "text" : "password"}
+                                                value={passwordData.newPassword}
+                                                onIonChange={e => {
+                                                    setPasswordData({ ...passwordData, newPassword: e.detail.value! });
+                                                    setErrors((prev: any) => ({ ...prev, password: undefined }));
+                                                }}
+                                            />
+                                            <IonIcon
+                                                slot="end"
+                                                icon={showNewPassword ? eyeOffOutline : eyeOutline}
+                                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                                className="cursor-pointer"
+                                            />
+                                        </IonItem>
+                                        
+                                        <IonItem className="bg-transparent mb-4">
+                                            <IonIcon icon={lockClosedOutline} slot="start" />
+                                            <IonInput
+                                                label="Confirm New Password"
+                                                labelPlacement="floating"
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                value={passwordData.confirmPassword}
+                                                onIonChange={e => {
+                                                    setPasswordData({ ...passwordData, confirmPassword: e.detail.value! });
+                                                    setErrors((prev: any) => ({ ...prev, password: undefined }));
+                                                }}
+                                            />
+                                            <IonIcon
+                                                slot="end"
+                                                icon={showConfirmPassword ? eyeOffOutline : eyeOutline}
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="cursor-pointer"
+                                            />
+                                        </IonItem>
+                                    </IonList>
+                                    
+                                    <div className="mt-4 md:mt-6">
                                         <button
                                             onClick={handlePasswordChange}
                                             className="w-full h-11 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white font-semibold text-base flex items-center justify-center space-x-2 hover:opacity-90 transition-opacity"
@@ -301,25 +293,20 @@ const Settings: React.FC = () => {
                                             <span>Update Password</span>
                                         </button>
                                         {errors.password && (
-                                            <div className="text-red-500 text-sm md:text-base text-center mt-1">{errors.password}</div>
+                                            <div className="text-red-500 text-sm md:text-base text-center mt-2">{errors.password}</div>
                                         )}
                                     </div>
-                                </IonList>
-
-
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
-
             <AlertMessage
                 isOpen={alert.show}
                 message={alert.message}
                 onDidDismiss={() => setAlert({ ...alert, show: false })}
             />
-
-
         </ProtectedLayout>
     );
 };

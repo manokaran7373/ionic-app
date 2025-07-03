@@ -87,7 +87,7 @@ const ForgotPasswordScreen: React.FC = () => {
                     <IonButtons slot="start">
                         <IonBackButton defaultHref="/login" />
                     </IonButtons>
-                    <IonTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 font-bold">
+                    <IonTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 font-bold">
                         Forgot Password
                     </IonTitle>
                 </IonToolbar>
